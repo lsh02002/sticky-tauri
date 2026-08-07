@@ -38,13 +38,13 @@ export const noteApi = {
   listNotes(folderId: number | null) {
     return invoke<NoteSummary[]>("list_notes", { folderId });
   },
-  listOpen() {
+  listOpenNotes() {
     return invoke<NoteSummary[]>("list_open_notes");
   },
-  listDeleted() {
+  listDeletedNotes() {
     return invoke<NoteSummary[]>("list_deleted_notes");
   },
-  restore(noteId: number) {
+  restoreDeletedNote(noteId: number) {
     return invoke<void>("set_deleted_note", {
       input: { noteId, isDeleted: false },
     });

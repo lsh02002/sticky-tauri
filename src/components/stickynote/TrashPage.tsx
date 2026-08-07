@@ -19,7 +19,7 @@ export default function TrashManager() {
       setError("");
 
       // 휴지통에 있는 메모 목록
-      const values = await noteApi.listDeleted();
+      const values = await noteApi.listDeletedNotes();
 
       setNotes(values);
     } catch (reason) {
@@ -53,7 +53,7 @@ export default function TrashManager() {
       setProcessingId(noteId);
       setError("");
 
-      await noteApi.restore(noteId);
+      await noteApi.restoreDeletedNote(noteId);
 
       setNotes((prev) => prev.filter((note) => note.id !== noteId));
     } catch (reason) {

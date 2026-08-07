@@ -16,7 +16,7 @@ export default function StickyHomePage() {
           return;
         }
 
-        let notes = await noteApi.listOpen();
+        let notes = await noteApi.listOpenNotes();
         const openedNotes = notes.filter((note) => note.open);
 
         if (openedNotes.length === 0) {
