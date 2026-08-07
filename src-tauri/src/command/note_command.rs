@@ -18,9 +18,9 @@ pub async fn create_folder(state: State<'_, AppState>, input: CreateFolderReques
 }
 
 #[tauri::command]
-pub async fn list_folders(state: State<'_, AppState>, folder_id: Option<i64>) -> Result<Vec<Folder>, String> {
+pub async fn list_folders(state: State<'_, AppState>) -> Result<Vec<Folder>, String> {
     let db = state.connection()?;
-    NoteService::list_folders(&db, folder_id).map_err(|e| e.to_string())
+    NoteService::list_folders(&db).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

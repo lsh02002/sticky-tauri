@@ -15,8 +15,8 @@ export const noteApi = {
   createFolder(name: string) {
     return invoke<FolderType>("create_folder", { input: { name } });
   },
-  listFolders(folderId?: number) {
-    return invoke<FolderType[]>("list_folders", { folderId });
+  listFolders() {
+    return invoke<FolderType[]>("list_folders");
   },
   setFolder(noteId: number, folderId: number) {
     return invoke<void>("set_folder", { noteId, folderId });

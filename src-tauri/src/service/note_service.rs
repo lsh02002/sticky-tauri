@@ -18,8 +18,8 @@ impl NoteService {
         SqliteNoteRepository::create_folder(connection, req)
     }
 
-    pub fn list_folders(connection: &Connection, folder_id: Option<i64>) -> AppResult<Vec<Folder>> {
-        SqliteNoteRepository::find_all_folders(connection, folder_id)
+    pub fn list_folders(connection: &Connection) -> AppResult<Vec<Folder>> {
+        SqliteNoteRepository::find_all_folders(connection)
     }
 
     pub fn set_folder(connection: &Connection, note_id: i64, folder_id: Option<i64>) -> AppResult<()> {

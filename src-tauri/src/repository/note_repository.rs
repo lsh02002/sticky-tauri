@@ -106,21 +106,17 @@ impl SqliteNoteRepository {
         Ok(folder)
     }
 
-    pub fn find_all_folders(
-        connection: &Connection,
-        folder_id: Option<i64>,
-    ) -> AppResult<Vec<Folder>> {
+    pub fn find_all_folders(connection: &Connection) -> AppResult<Vec<Folder>> {
         let mut stmt = connection.prepare(
             r#"
             SELECT *
-            FROM folders
-            WHERE parent_id IS ?1
+            FROM folders            
             ORDER BY sort_order ASC, name ASC
             "#,
         )?;
 
         let folders = stmt
-            .query_map([folder_id], |row| {
+            .query_map([], |row| {
                 Ok(Folder {
                     id: row.get("id")?,
                     name: row.get("name")?,                    
