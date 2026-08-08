@@ -17,8 +17,8 @@ impl SqliteNoteRepository {
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,                
                 sort_order INTEGER NOT NULL DEFAULT 0,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
                 FOREIGN KEY (parent_id) REFERENCES folders(id) ON DELETE SET NULL
             );
 
@@ -34,8 +34,8 @@ impl SqliteNoteRepository {
                 folder_id INTEGER,
                 open INTEGER NOT NULL DEFAULT 0,
                 is_deleted INTEGER NOT NULL DEFAULT 0,
-                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                created_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
                 FOREIGN KEY (folder_id) REFERENCES folders(id) ON DELETE SET NULL
             );
 
@@ -132,7 +132,7 @@ impl SqliteNoteRepository {
 
     pub fn set_folder(connection: &Connection, note_id: i64, folder_id: Option<i64>) -> AppResult<()> {
         let changed = connection.execute(
-            "UPDATE notes SET folder_id = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
+            "UPDATE notes SET folder_id = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![folder_id, note_id],
         )?;
         if changed == 0 {
@@ -143,7 +143,7 @@ impl SqliteNoteRepository {
 
     pub fn rename_folder(connection: &Connection, folder_id: i64, new_name: &str) -> AppResult<()> {
         let changed = connection.execute(
-            "UPDATE folders SET name = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
+            "UPDATE folders SET name = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![new_name, folder_id],
         )?;
         if changed == 0 {
@@ -170,12 +170,24 @@ impl SqliteNoteRepository {
         })
     }
 
-    pub fn create_note(connection: &Connection, note_type: &str, title: &str, color: &str) -> AppResult<i64> {
-        connection.execute(
+    pub fn create_note(connection: &mut Connection, note_type: &str, title: &str, color: &str) -> AppResult<i64> {
+        let tx = connection.transaction()?;
+        tx.execute(
             "INSERT INTO notes (note_type, title, color) VALUES (?1, ?2, ?3)",
             params![note_type, title, color],
         )?;
-        Ok(connection.last_insert_rowid())
+
+        let id = tx.last_insert_rowid();
+
+        tx.execute(
+            "UPDATE notes
+            SET updated_at = datetime('now', '+9 hours')
+            WHERE id = ?1",
+            params![id],
+        )?;
+
+        tx.commit()?;
+        Ok(id)
     }
 
     pub fn create_text_detail(connection: &Connection, note_id: i64) -> AppResult<()> {
@@ -188,7 +200,7 @@ impl SqliteNoteRepository {
 
     pub fn set_open(connection: &Connection, note_id: i64, open: bool) -> AppResult<()> {
         connection.execute(
-            "UPDATE notes SET open = ?1 WHERE id = ?2",
+            "UPDATE notes SET open = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![open, note_id],
         )?;
         Ok(())
@@ -196,7 +208,7 @@ impl SqliteNoteRepository {
 
     pub fn set_is_deleted(connection: &Connection, note_id: i64, is_deleted: bool) -> AppResult<()> {
         connection.execute(
-            "UPDATE notes SET is_deleted = ?1 WHERE id = ?2",
+            "UPDATE notes SET is_deleted = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![is_deleted, note_id],
         )?;
         Ok(())
@@ -476,7 +488,7 @@ impl SqliteNoteRepository {
 
     pub fn update_color(connection: &Connection, note_id: i64, color: &str) -> AppResult<()> {
         let changed = connection.execute(
-            "UPDATE notes SET color = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
+            "UPDATE notes SET color = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![color, note_id],
         )?;
         if changed == 0 {
