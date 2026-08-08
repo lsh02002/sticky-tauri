@@ -300,7 +300,10 @@ export default function MainManager() {
         className="min-vh-100 app-shell flex-grow-1"
         style={{ marginLeft: 240 }}
       >
-        <nav className="navbar navbar-dark bg-dark shadow-sm">
+        <nav
+          className="navbar navbar-dark bg-dark shadow-sm position-fixed"
+          style={{ width: "calc(100% - 240px)", zIndex: 100 }}
+        >
           <div className="container-fluid">
             <span className="navbar-brand fw-bold">
               <i className="bi bi-stickies me-2" />
@@ -379,7 +382,7 @@ export default function MainManager() {
           />
         </nav>
 
-        <main className="container-fluid py-4">
+        <main className="container-fluid py-4" style={{ marginTop: 115 }}>
           {error && (
             <div className="alert alert-danger" role="alert">
               {error}
