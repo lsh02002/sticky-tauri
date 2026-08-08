@@ -43,7 +43,7 @@ impl NoteService {
         Ok(())
     }
 
-    pub fn create_note(connection: &mut Connection, input: CreateNoteInput) -> AppResult<NoteSummary> {
+    pub fn create_note(connection: &Connection, input: CreateNoteInput) -> AppResult<NoteSummary> {
         if input.title.trim().is_empty() {
             return Err(AppError::Validation("제목을 입력해주세요.".into()));
         }        
@@ -86,7 +86,7 @@ impl NoteService {
         SqliteNoteRepository::set_is_deleted(connection, note_id, is_deleted)
     }
 
-    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<()> {
+    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<bool> {
         if title.trim().is_empty() {
             return Err(AppError::Validation("제목을 입력해주세요.".into()));
         }

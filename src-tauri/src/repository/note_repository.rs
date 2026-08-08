@@ -170,24 +170,13 @@ impl SqliteNoteRepository {
         })
     }
 
-    pub fn create_note(connection: &mut Connection, note_type: &str, title: &str, color: &str) -> AppResult<i64> {
-        let tx = connection.transaction()?;
-        tx.execute(
+    pub fn create_note(connection: &Connection, note_type: &str, title: &str, color: &str) -> AppResult<i64> {        
+        connection.execute(
             "INSERT INTO notes (note_type, title, color) VALUES (?1, ?2, ?3)",
             params![note_type, title, color],
         )?;
-
-        let id = tx.last_insert_rowid();
-
-        tx.execute(
-            "UPDATE notes
-            SET updated_at = datetime('now', '+9 hours')
-            WHERE id = ?1",
-            params![id],
-        )?;
-
-        tx.commit()?;
-        Ok(id)
+        
+        Ok(connection.last_insert_rowid())
     }
 
     pub fn create_text_detail(connection: &Connection, note_id: i64) -> AppResult<()> {
@@ -200,7 +189,7 @@ impl SqliteNoteRepository {
 
     pub fn set_open(connection: &Connection, note_id: i64, open: bool) -> AppResult<()> {
         connection.execute(
-            "UPDATE notes SET open = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
+            "UPDATE notes SET open = ?1 WHERE id = ?2",
             params![open, note_id],
         )?;
         Ok(())
@@ -214,15 +203,30 @@ impl SqliteNoteRepository {
         Ok(())
     }
 
-    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<()> {
+    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<bool> {
+        let current_title: String = connection.query_row(
+            "SELECT title FROM notes WHERE id = ?1",
+            [note_id],
+            |row| row.get(0),
+        )?;
+
+        if title == current_title {
+            return Ok(false); // No changes needed
+        }
+
         let changed = connection.execute(
-            "UPDATE notes SET title = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
+            "UPDATE notes
+            SET title = ?1,
+                updated_at = datetime('now', '+9 hours')
+            WHERE id = ?2",
             params![title, note_id],
         )?;
+
         if changed == 0 {
             return Err(AppError::NotFound("메모".into()));
         }
-        Ok(())
+
+        Ok(true)
     }
 
     pub fn list_notes(connection: &Connection, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
@@ -307,19 +311,22 @@ impl SqliteNoteRepository {
     pub fn update_text(connection: &mut Connection, note_id: i64, content: &str) -> AppResult<()> {        
         let tx = connection.transaction()?;
 
-        tx.execute(
+        let changed = tx.execute(
             "UPDATE text_notes
             SET content = ?1
-            WHERE note_id = ?2",
+            WHERE note_id = ?2
+            AND content != ?1",
             params![content, note_id],
         )?;
 
-        tx.execute(
-            "UPDATE notes
-            SET updated_at = datetime('now', '+9 hours')
-            WHERE id = ?1",
-            params![note_id],
-        )?;
+        if changed > 0 {
+            tx.execute(
+                "UPDATE notes
+                SET updated_at = datetime('now', '+9 hours')
+                WHERE id = ?1",
+                params![note_id],
+            )?;
+        }
 
         tx.commit()?;
 

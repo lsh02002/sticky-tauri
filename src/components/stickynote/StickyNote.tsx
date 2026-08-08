@@ -199,7 +199,13 @@ export default function StickyNote() {
         };
       });
 
-      await emit("note-color-changed", { noteId: Number(noteId), color });
+      await emit("note-color-changed", {
+        noteId: Number(noteId),
+        color,
+        updatedAt: new Date().toLocaleString("sv-SE", {
+          timeZone: "Asia/Seoul",
+        }),
+      });
     } catch (reason) {
       console.error("색상 변경 실패:", reason);
       setError(String(reason));
@@ -231,11 +237,22 @@ export default function StickyNote() {
   }
 
   async function updateTitle() {
-    await noteApi.updateTitle(Number(note?.id), title);
-    await emit("note-title-changed", {
-      noteId: Number(noteId),
-      title,
-    });
+    try {
+      const changed = await noteApi.updateTitle(Number(note?.id), title);
+
+      if (changed) {
+        await emit("note-title-changed", {
+          noteId: Number(noteId),
+          title,
+          updatedAt: new Date().toLocaleString("sv-SE", {
+            timeZone: "Asia/Seoul",
+          }),
+        });
+      }
+    } catch (reason) {
+      console.error("제목 업데이트 실패:", reason);
+      setError(String(reason));
+    }
   }
 
   if (loading) {

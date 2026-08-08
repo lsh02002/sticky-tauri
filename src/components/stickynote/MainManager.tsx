@@ -58,28 +58,27 @@ export default function MainManager() {
   }, [searchQuery]);
 
   useEffect(() => {
-    const unlisten = listen<{ noteId: number; color: string }>(
-      "note-color-changed",
-      async (event) => {
-        try {
-          setNotes((prev) =>
-            prev.map((note) =>
-              note.id === event.payload.noteId
-                ? {
-                    ...note,
-                    color: event.payload.color,
-                    updatedAt: new Date().toLocaleString("sv-SE", {
-                      timeZone: "Asia/Seoul",
-                    }),
-                  }
-                : note,
-            ),
-          );
-        } catch (error) {
-          console.error(error);
-        }
-      },
-    );
+    const unlisten = listen<{
+      noteId: number;
+      color: string;
+      updatedAt: string;
+    }>("note-color-changed", async (event) => {
+      try {
+        setNotes((prev) =>
+          prev.map((note) =>
+            note.id === event.payload.noteId
+              ? {
+                  ...note,
+                  color: event.payload.color,
+                  updatedAt: event.payload.updatedAt,
+                }
+              : note,
+          ),
+        );
+      } catch (error) {
+        console.error(error);
+      }
+    });
 
     return () => {
       unlisten.then((fn) => fn());
@@ -87,25 +86,24 @@ export default function MainManager() {
   }, []);
 
   useEffect(() => {
-    const unlisten = listen<{ noteId: number; title: string }>(
-      "note-title-changed",
-      (event) => {
-        setNotes((prev) => {
-          const next = prev.map((note) =>
-            note.id === event.payload.noteId
-              ? {
-                  ...note,
-                  title: event.payload.title,
-                  updatedAt: new Date().toLocaleString("sv-SE", {
-                    timeZone: "Asia/Seoul",
-                  }),
-                }
-              : note,
-          );
-          return next;
-        });
-      },
-    );
+    const unlisten = listen<{
+      noteId: number;
+      title: string;
+      updatedAt: string;
+    }>("note-title-changed", (event) => {
+      setNotes((prev) => {
+        const next = prev.map((note) =>
+          note.id === event.payload.noteId
+            ? {
+                ...note,
+                title: event.payload.title,
+                updatedAt: event.payload.updatedAt,
+              }
+            : note,
+        );
+        return next;
+      });
+    });
 
     return () => {
       void unlisten.then((fn) => fn());

@@ -58,7 +58,7 @@ export const noteApi = {
     });
   },
   updateTitle(noteId: number, title: string) {
-    return invoke<void>("update_note_title", { noteId, title });
+    return invoke<boolean>("update_note_title", { noteId, title });
   },
   getTodo(noteId: number) {
     return invoke<TodoNote>("get_todo_note", { noteId });

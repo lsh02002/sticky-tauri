@@ -37,8 +37,8 @@ pub async fn rename_folder(state: State<'_, AppState>, folder_id: i64, new_name:
 
 #[tauri::command]
 pub async fn create_note(state: State<'_, AppState>, input: CreateNoteInput) -> Result<NoteSummary, String> {
-    let mut db = state.connection()?;
-    NoteService::create_note(&mut db, input).map_err(|e| e.to_string())
+    let db = state.connection()?;
+    NoteService::create_note(&db, input).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -72,7 +72,7 @@ pub async fn set_deleted_note(state: State<'_, AppState>, input: SetDeletedNoteI
 }
 
 #[tauri::command]
-pub async fn update_note_title(state: State<'_, AppState>, note_id: i64, title: String) -> Result<(), String> {
+pub async fn update_note_title(state: State<'_, AppState>, note_id: i64, title: String) -> Result<bool, String> {
     let db = state.connection()?;
     NoteService::update_title(&db, note_id, &title).map_err(|e| e.to_string())
 }
