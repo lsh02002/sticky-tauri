@@ -304,7 +304,7 @@ export default function MainManager() {
               <i className="bi bi-stickies me-2" />
               Sticky Tauri
             </span>
-            <div className="d-flex gap-5">
+            <div className="d-flex gap-2">
               <button
                 type="button"
                 className="btn btn-warning btn-sm"
