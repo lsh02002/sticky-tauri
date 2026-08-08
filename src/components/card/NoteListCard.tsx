@@ -95,7 +95,7 @@ export function NoteListCard({
           {highlightText(note.title, query)}
         </h5>
         <div className="small text-body-secondary">
-          {new Date(note.updatedAt.replace(" ", "T") + "Z").toLocaleString(
+          {new Date(note.updatedAt).toLocaleString(
             "ko-KR",
             {
               timeZone: "Asia/Seoul",

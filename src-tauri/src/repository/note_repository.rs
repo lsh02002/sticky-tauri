@@ -204,7 +204,7 @@ impl SqliteNoteRepository {
 
     pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<()> {
         let changed = connection.execute(
-            "UPDATE notes SET title = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
+            "UPDATE notes SET title = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![title, note_id],
         )?;
         if changed == 0 {
@@ -292,11 +292,25 @@ impl SqliteNoteRepository {
         )?)
     }
 
-    pub fn update_text(connection: &Connection, note_id: i64, content: &str) -> AppResult<()> {        
-        connection.execute(
-            "UPDATE text_notes SET content = ?1 WHERE note_id = ?2",
+    pub fn update_text(connection: &mut Connection, note_id: i64, content: &str) -> AppResult<()> {        
+        let tx = connection.transaction()?;
+
+        tx.execute(
+            "UPDATE text_notes
+            SET content = ?1
+            WHERE note_id = ?2",
             params![content, note_id],
         )?;
+
+        tx.execute(
+            "UPDATE notes
+            SET updated_at = datetime('now', '+9 hours')
+            WHERE id = ?1",
+            params![note_id],
+        )?;
+
+        tx.commit()?;
+
         Ok(())
     }
 

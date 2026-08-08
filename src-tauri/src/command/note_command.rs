@@ -85,8 +85,8 @@ pub async fn get_text_note(state: State<'_, AppState>, note_id: i64) -> Result<T
 
 #[tauri::command]
 pub async fn update_text_note(state: State<'_, AppState>, input: UpdateTextNoteInput) -> Result<(), String> {
-    let db = state.connection()?;
-    NoteService::update_text(&db, input).map_err(|e| e.to_string())
+    let mut db = state.connection()?;
+    NoteService::update_text(&mut *db, input).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

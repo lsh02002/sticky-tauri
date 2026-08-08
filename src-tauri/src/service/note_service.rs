@@ -103,7 +103,7 @@ impl NoteService {
         Ok(TextNote { note, content })
     }
 
-    pub fn update_text(connection: &Connection, input: UpdateTextNoteInput) -> AppResult<()> {
+    pub fn update_text(connection: &mut Connection, input: UpdateTextNoteInput) -> AppResult<()> {
         Self::require_type(connection, input.note_id, "text")?;
         SqliteNoteRepository::update_text(
             connection,

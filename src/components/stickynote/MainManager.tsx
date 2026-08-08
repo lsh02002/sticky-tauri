@@ -68,6 +68,7 @@ export default function MainManager() {
                 ? {
                     ...note,
                     color: event.payload.color,
+                    updatedAt: new Date().toISOString(),
                   }
                 : note,
             ),
@@ -93,6 +94,7 @@ export default function MainManager() {
               ? {
                   ...note,
                   title: event.payload.title,
+                  updatedAt: new Date().toISOString(),
                 }
               : note,
           );
