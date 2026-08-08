@@ -1,6 +1,4 @@
 import type { MouseEvent, ReactNode } from "react";
-import { useEffect } from "react";
-import { listen } from "@tauri-apps/api/event";
 import type { NoteSummary } from "../../types/note";
 import { noteApi } from "../../api/noteApi";
 import { confirm } from "@tauri-apps/plugin-dialog";
@@ -96,7 +94,15 @@ export function NoteListCard({
         <h5 className="text-truncate mb-2">
           {highlightText(note.title, query)}
         </h5>
-        <p className="small text-body-secondary mb-3">독립 창으로 열기</p>
+        <div className="small text-body-secondary">
+          {new Date(note.updatedAt.replace(" ", "T") + "Z").toLocaleString(
+            "ko-KR",
+            {
+              timeZone: "Asia/Seoul",
+            },
+          )}
+        </div>
+        <div className="small text-body-secondary mb-3">독립 창으로 열기</div>
         <button
           className="btn btn-dark btn-sm mt-auto"
           onClick={(event) => {
