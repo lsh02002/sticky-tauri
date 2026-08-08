@@ -52,10 +52,13 @@ export const noteApi = {
   getText(noteId: number) {
     return invoke<TextNote>("get_text_note", { noteId });
   },
-  updateText(noteId: number, title: string, content: string) {
+  updateText(noteId: number, content: string) {
     return invoke<void>("update_text_note", {
-      input: { noteId, title, content },
+      input: { noteId, content },
     });
+  },
+  updateTitle(noteId: number, title: string) {
+    return invoke<void>("update_note_title", { noteId, title });
   },
   getTodo(noteId: number) {
     return invoke<TodoNote>("get_todo_note", { noteId });

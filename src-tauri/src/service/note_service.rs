@@ -88,6 +88,13 @@ impl NoteService {
         SqliteNoteRepository::set_is_deleted(connection, note_id, is_deleted)
     }
 
+    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<()> {
+        if title.trim().is_empty() {
+            return Err(AppError::Validation("제목을 입력해주세요.".into()));
+        }
+        SqliteNoteRepository::update_title(connection, note_id, title.trim())
+    }
+
     pub fn get_text(connection: &Connection, note_id: i64) -> AppResult<TextNote> {
         Self::require_type(connection, note_id, "text")?;
         let note = SqliteNoteRepository::find_note(connection, note_id)?
@@ -100,8 +107,7 @@ impl NoteService {
         Self::require_type(connection, input.note_id, "text")?;
         SqliteNoteRepository::update_text(
             connection,
-            input.note_id,
-            input.title.trim(),
+            input.note_id,            
             &input.content,
         )
     }

@@ -202,6 +202,17 @@ impl SqliteNoteRepository {
         Ok(())
     }
 
+    pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<()> {
+        let changed = connection.execute(
+            "UPDATE notes SET title = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
+            params![title, note_id],
+        )?;
+        if changed == 0 {
+            return Err(AppError::NotFound("메모".into()));
+        }
+        Ok(())
+    }
+
     pub fn list_notes(connection: &Connection, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
         let mut stmt = connection.prepare(
             "SELECT id, note_type, title, color, x, y, width, height, folder_id, open, is_deleted, created_at, updated_at
@@ -281,11 +292,7 @@ impl SqliteNoteRepository {
         )?)
     }
 
-    pub fn update_text(connection: &Connection, note_id: i64, title: &str, content: &str) -> AppResult<()> {
-        connection.execute(
-            "UPDATE notes SET title = ?1, updated_at = CURRENT_TIMESTAMP WHERE id = ?2",
-            params![title, note_id],
-        )?;
+    pub fn update_text(connection: &Connection, note_id: i64, content: &str) -> AppResult<()> {        
         connection.execute(
             "UPDATE text_notes SET content = ?1 WHERE note_id = ?2",
             params![content, note_id],

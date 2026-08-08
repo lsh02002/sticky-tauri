@@ -18,6 +18,7 @@ export default function StickyNote() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [title, setTitle] = useState("");
   const [changingColor, setChangingColor] = useState(false);
   const [folderId, setFolderId] = useState("");
   const [folderOptions, setFolderOptions] = useState<SelectOption[]>([]);
@@ -70,6 +71,7 @@ export default function StickyNote() {
       }
 
       setNote(found);
+      setTitle(found.title);
       setFolderId(found.folderId ? String(found.folderId) : "");
 
       await currentWindow.setTitle(found.title.trim() || "스티키 메모");
@@ -80,6 +82,35 @@ export default function StickyNote() {
       setLoading(false);
     }
   }, [currentWindow, noteId]);
+
+  useEffect(() => {
+    let unlisten: (() => void) | null = null;
+
+    (async () => {
+      unlisten = await listen<{ noteId: number }>(
+        "note-title-changed",
+        async (event) => {
+          if (event.payload.noteId === Number(noteId)) {
+            const notes = await noteApi.listNotes(
+              folderId ? Number(folderId) : null,
+            );
+            const found = notes?.find((item) => item.id === Number(noteId));
+
+            if (found) {
+              setNote(found);
+              await currentWindow.setTitle(found.title.trim() || "스티키 메모");
+            }
+          }
+        },
+      );
+    })();
+
+    return () => {
+      if (unlisten) {
+        unlisten();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     void reload();
@@ -199,6 +230,14 @@ export default function StickyNote() {
     }
   }
 
+  async function updateTitle() {
+    await noteApi.updateTitle(Number(note?.id), title);
+    await emit("note-title-changed", {
+      noteId: Number(noteId),
+      title,
+    });
+  }
+
   if (loading) {
     return (
       <div className="d-flex min-vh-100 align-items-center justify-content-center">
@@ -265,7 +304,14 @@ export default function StickyNote() {
           관리창
         </span>
 
-        <strong className="text-truncate flex-grow-1">{note.title}</strong>
+        <div className="d-flex align-items-center gap-2">
+          <input
+            className="form-control form-control-sm"
+            value={title}
+            onChange={async (e) => setTitle(e.target.value)}
+            onBlur={updateTitle}
+          />
+        </div>
 
         <div className="dropdown">
           <button
@@ -359,11 +405,11 @@ export default function StickyNote() {
           <TextMemo note={note} onChanged={() => void reload()} />
         )}
 
-        {note.noteType === "todo" && <TodoMemo noteId={note.id} />}
+        {note.noteType === "todo" && <TodoMemo note={note} />}
 
-        {note.noteType === "expense" && <ExpenseMemo noteId={note.id} />}
+        {note.noteType === "expense" && <ExpenseMemo note={note} />}
 
-        {note.noteType === "photo" && <PhotoMemo noteId={note.id} />}
+        {note.noteType === "photo" && <PhotoMemo note={note} />}
 
         {!["text", "todo", "expense", "photo"].includes(note.noteType) && (
           <div className="alert alert-danger">

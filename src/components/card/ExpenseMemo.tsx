@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
-import type { ExpenseNote } from "../../types/note";
+import type { ExpenseNote, NoteSummary } from "../../types/note";
 
-export function ExpenseMemo({ noteId }: { noteId: number }) {
+export function ExpenseMemo({ note }: { note: NoteSummary }) {
   const [data, setData] = useState<ExpenseNote | null>(null);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -11,17 +11,17 @@ export function ExpenseMemo({ noteId }: { noteId: number }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
   async function reload() {
-    setData(await noteApi.getExpense(noteId));
+    setData(await noteApi.getExpense(note.id));
   }
   useEffect(() => {
     void reload();
-  }, [noteId]);
+  }, [note.id]);
 
   async function add() {
     const parsed = Number(amount);
     if (!description.trim() || !Number.isInteger(parsed) || parsed <= 0) return;
     await noteApi.addExpense({
-      noteId,
+      noteId: note.id,
       description,
       amount: parsed,
       kind,

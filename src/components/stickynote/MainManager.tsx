@@ -52,9 +52,6 @@ export default function MainManager() {
       setError(String(reason));
     }
   }
-  useEffect(() => {
-    void reload();
-  }, []);
 
   useEffect(() => {
     void reload(searchQuery);
@@ -89,26 +86,23 @@ export default function MainManager() {
   useEffect(() => {
     const unlisten = listen<{ noteId: number; title: string }>(
       "note-title-changed",
-      async (event) => {
-        try {
-          setNotes((prev) =>
-            prev.map((note) =>
-              note.id === event.payload.noteId
-                ? {
-                    ...note,
-                    title: event.payload.title,
-                  }
-                : note,
-            ),
+      (event) => {
+        setNotes((prev) => {
+          const next = prev.map((note) =>
+            note.id === event.payload.noteId
+              ? {
+                  ...note,
+                  title: event.payload.title,
+                }
+              : note,
           );
-        } catch (error) {
-          console.error(error);
-        }
+          return next;
+        });
       },
     );
 
     return () => {
-      unlisten.then((fn) => fn());
+      void unlisten.then((fn) => fn());
     };
   }, []);
 

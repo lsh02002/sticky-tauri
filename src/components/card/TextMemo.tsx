@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
-import { emit } from "@tauri-apps/api/event";
 import type { NoteSummary } from "../../types/note";
 
 export function TextMemo({
@@ -10,25 +9,18 @@ export function TextMemo({
   note: NoteSummary;
   onChanged: () => void;
 }) {
-  const [title, setTitle] = useState(note.title);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    noteApi.getText(note.id).then((value) => {
-      setTitle(value.note.title);
+    noteApi.getText(note.id).then((value) => {      
       setContent(value.content);
       setLoading(false);
     });
   }, [note.id]);
 
   async function save() {
-    await noteApi.updateText(note.id, title, content);
-
-    await emit("note-title-changed", {
-      noteId: note.id,
-      title,
-    });
+    await noteApi.updateText(note.id, content);
     onChanged();
   }
 
@@ -36,11 +28,6 @@ export function TextMemo({
 
   return (
     <>
-      <input
-        className="form-control form-control-sm mb-2"
-        value={title}
-        onChange={async (e) => setTitle(e.target.value)}
-      />
       <textarea
         className="form-control memo-textarea"
         value={content}

@@ -1,4 +1,6 @@
 import type { MouseEvent, ReactNode } from "react";
+import { useEffect } from "react";
+import { listen } from "@tauri-apps/api/event";
 import type { NoteSummary } from "../../types/note";
 import { noteApi } from "../../api/noteApi";
 import { confirm } from "@tauri-apps/plugin-dialog";

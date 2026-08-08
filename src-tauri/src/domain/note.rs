@@ -57,7 +57,6 @@ pub struct CreateNoteInput {
 #[serde(rename_all = "camelCase")]
 pub struct UpdateTextNoteInput {
     pub note_id: i64,
-    pub title: String,
     pub content: String,
 }
 
