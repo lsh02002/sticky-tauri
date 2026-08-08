@@ -77,6 +77,7 @@ export default function MainManager() {
         );
       } catch (error) {
         console.error(error);
+        setError(String(error));
       }
     });
 
@@ -91,18 +92,23 @@ export default function MainManager() {
       title: string;
       updatedAt: string;
     }>("note-title-changed", (event) => {
-      setNotes((prev) => {
-        const next = prev.map((note) =>
-          note.id === event.payload.noteId
-            ? {
-                ...note,
-                title: event.payload.title,
-                updatedAt: event.payload.updatedAt,
-              }
-            : note,
-        );
-        return next;
-      });
+      try {
+        setNotes((prev) => {
+          const next = prev.map((note) =>
+            note.id === event.payload.noteId
+              ? {
+                  ...note,
+                  title: event.payload.title,
+                  updatedAt: event.payload.updatedAt,
+                }
+              : note,
+          );
+          return next;
+        });
+      } catch (error) {
+        console.error(error);
+        setError(String(error));
+      }
     });
 
     return () => {
@@ -120,6 +126,7 @@ export default function MainManager() {
           );
         } catch (error) {
           console.error(error);
+          setError(String(error));
         }
       },
     );
