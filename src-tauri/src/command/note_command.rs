@@ -43,7 +43,7 @@ pub async fn create_note(state: State<'_, AppState>, input: CreateNoteInput) -> 
 
 #[tauri::command]
 pub async fn list_notes(state: State<'_, AppState>, folder_id: Option<i64>) -> Result<Vec<NoteSummary>, String> {
-    let db: std::sync::MutexGuard<'_, rusqlite::Connection> = state.connection()?;
+    let db = state.connection()?;
     NoteService::list_notes(&db, folder_id).map_err(|e| e.to_string())
 }
 
