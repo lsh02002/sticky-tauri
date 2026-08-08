@@ -265,7 +265,7 @@ impl SqliteNoteRepository {
     pub fn search_notes(connection: &Connection, query: &str, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
         let mut stmt = connection.prepare(
             "SELECT id, note_type, title, color, x, y, width, height, folder_id, open, is_deleted, created_at, updated_at
-             FROM notes WHERE is_deleted = 0 AND title LIKE ?1
+             FROM notes WHERE is_deleted = 0 AND (title LIKE ?1 OR updated_at LIKE ?1)
              AND (?2 IS NULL OR folder_id = ?2)
              ORDER BY updated_at DESC, id DESC",
         )?;

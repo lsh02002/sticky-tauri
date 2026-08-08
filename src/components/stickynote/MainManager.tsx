@@ -68,7 +68,9 @@ export default function MainManager() {
                 ? {
                     ...note,
                     color: event.payload.color,
-                    updatedAt: new Date().toISOString(),
+                    updatedAt: new Date().toLocaleString("sv-SE", {
+                      timeZone: "Asia/Seoul",
+                    }),
                   }
                 : note,
             ),
@@ -94,7 +96,9 @@ export default function MainManager() {
               ? {
                   ...note,
                   title: event.payload.title,
-                  updatedAt: new Date().toISOString(),
+                  updatedAt: new Date().toLocaleString("sv-SE", {
+                    timeZone: "Asia/Seoul",
+                  }),
                 }
               : note,
           );
