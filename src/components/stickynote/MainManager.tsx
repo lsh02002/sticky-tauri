@@ -284,6 +284,15 @@ export default function MainManager() {
             </div>
           ))}
         </div>
+        <div className="d-grid my-2">
+          <button
+            type="button"
+            className="btn btn-danger"
+            onClick={() => void goToTrash()}
+          >
+            휴지통으로 이동
+          </button>
+        </div>
       </aside>
       <div
         className="min-vh-100 app-shell flex-grow-1"
@@ -296,73 +305,61 @@ export default function MainManager() {
               Sticky Tauri
             </span>
             <div className="d-flex gap-5">
-              <div className="d-flex gap-2">
-                <button
-                  type="button"
-                  className="btn btn-warning btn-sm"
-                  disabled={creating !== null}
-                  onClick={() => void create("text")}
-                >
-                  {creating === "text" ? (
-                    <span className="spinner-border spinner-border-sm me-1" />
-                  ) : (
-                    <i className="bi bi-file-text me-1" />
-                  )}
-                  텍스트
-                </button>
+              <button
+                type="button"
+                className="btn btn-warning btn-sm"
+                disabled={creating !== null}
+                onClick={() => void create("text")}
+              >
+                {creating === "text" ? (
+                  <span className="spinner-border spinner-border-sm me-1" />
+                ) : (
+                  <i className="bi bi-file-text me-1" />
+                )}
+                텍스트
+              </button>
 
-                <button
-                  type="button"
-                  className="btn btn-success btn-sm"
-                  disabled={creating !== null}
-                  onClick={() => void create("todo")}
-                >
-                  {creating === "todo" ? (
-                    <span className="spinner-border spinner-border-sm me-1" />
-                  ) : (
-                    <i className="bi bi-check2-square me-1" />
-                  )}
-                  투두
-                </button>
+              <button
+                type="button"
+                className="btn btn-success btn-sm"
+                disabled={creating !== null}
+                onClick={() => void create("todo")}
+              >
+                {creating === "todo" ? (
+                  <span className="spinner-border spinner-border-sm me-1" />
+                ) : (
+                  <i className="bi bi-check2-square me-1" />
+                )}
+                투두
+              </button>
 
-                <button
-                  type="button"
-                  className="btn btn-info btn-sm"
-                  disabled={creating !== null}
-                  onClick={() => void create("expense")}
-                >
-                  {creating === "expense" ? (
-                    <span className="spinner-border spinner-border-sm me-1" />
-                  ) : (
-                    <i className="bi bi-wallet2 me-1" />
-                  )}
-                  가계부
-                </button>
+              <button
+                type="button"
+                className="btn btn-info btn-sm"
+                disabled={creating !== null}
+                onClick={() => void create("expense")}
+              >
+                {creating === "expense" ? (
+                  <span className="spinner-border spinner-border-sm me-1" />
+                ) : (
+                  <i className="bi bi-wallet2 me-1" />
+                )}
+                가계부
+              </button>
 
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  disabled={creating !== null}
-                  onClick={() => void create("photo")}
-                >
-                  {creating === "photo" ? (
-                    <span className="spinner-border spinner-border-sm me-1" />
-                  ) : (
-                    <i className="bi bi-image me-1" />
-                  )}
-                  사진
-                </button>
-              </div>
-              <div>
-                <button
-                  type="button"
-                  className="btn btn-danger btn-sm"
-                  onClick={() => void goToTrash()}
-                >
-                  <i className="bi bi-trash3 me-1" />
-                  휴지통으로 이동
-                </button>
-              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                disabled={creating !== null}
+                onClick={() => void create("photo")}
+              >
+                {creating === "photo" ? (
+                  <span className="spinner-border spinner-border-sm me-1" />
+                ) : (
+                  <i className="bi bi-image me-1" />
+                )}
+                사진
+              </button>
             </div>
           </div>
           <input
