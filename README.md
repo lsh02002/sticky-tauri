@@ -1,6 +1,6 @@
 # Sticky Tauri
 
-Tauri 2 + Rust + SQLite + React + Bootstrap로 만든 모듈형 스티키 메모 샘플입니다.
+Tauri 2 + Rust + SQLite + React + Bootstrap로 만든 모듈형 스티키 메모 앱입니다.
 
 ## 기능
 
