@@ -1,17 +1,88 @@
-body { margin: 0; min-width: 320px; background: #eef1f4; }
-.app-shell { background: radial-gradient(circle at top left, #f8f9fa, #e9ecef 55%, #dee2e6); }
-.memo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1.25rem; align-items: start; }
-.sticky-card { min-height: 300px; border-radius: 1rem; transition: transform .15s ease, box-shadow .15s ease; }
-.sticky-card:hover { transform: translateY(-2px); box-shadow: 0 .8rem 1.8rem rgba(0,0,0,.12)!important; }
-.memo-textarea { min-height: 190px; resize: vertical; background: rgba(255,255,255,.55); }
-.color-button { width: 28px; height: 28px; border: 1px solid rgba(0,0,0,.15); border-radius: 50%; }
-.expense-list { max-height: 170px; overflow-y: auto; }
-.empty-state { padding-top: 15vh; }
-.card .form-control, .card .form-select { background-color: rgba(255,255,255,.65); }
-.note-list-card { min-height: 210px; border-radius: 1rem; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
-.note-list-card:hover, .note-list-card:focus { transform: translateY(-3px); box-shadow: 0 .8rem 1.8rem rgba(0,0,0,.14)!important; outline: none; }
-.note-type-icon { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.55); }
-.note-window { overflow: auto; }
-.note-editor-panel { min-height: calc(100vh - 78px); padding: 1rem; border-radius: .9rem; background: rgba(255,255,255,.24); }
-.note-window .memo-textarea { min-height: calc(100vh - 190px); }
-.note-window .expense-list { max-height: calc(100vh - 300px); }
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #eef1f4;
+}
+.app-shell {
+  background: radial-gradient(
+    circle at top left,
+    #f8f9fa,
+    #e9ecef 55%,
+    #dee2e6
+  );
+}
+.memo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+.sticky-card {
+  min-height: 300px;
+  border-radius: 1rem;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.sticky-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.12) !important;
+}
+.memo-textarea {
+  min-height: 190px;
+  resize: vertical;
+  background: rgba(255, 255, 255, 0.55);
+}
+.color-button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+}
+.expense-list {
+  overflow-y: none;
+}
+.empty-state {
+  padding-top: 15vh;
+}
+.card .form-control,
+.card .form-select {
+  background-color: rgba(255, 255, 255, 0.65);
+}
+.note-list-card {
+  min-height: 210px;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.note-list-card:hover,
+.note-list-card:focus {
+  transform: translateY(-3px);
+  box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.14) !important;
+  outline: none;
+}
+.note-type-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+.note-window {
+  overflow: auto;
+}
+.note-editor-panel {
+  min-height: calc(100vh - 78px);
+  padding: 1rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.24);
+}
+.note-window .memo-textarea {
+  min-height: calc(100vh - 190px);
+}
+.note-window .expense-list {
+  max-height: 100%;
+}

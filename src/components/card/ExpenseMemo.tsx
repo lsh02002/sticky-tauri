@@ -100,37 +100,37 @@ export function ExpenseMemo({ note }: { note: NoteSummary }) {
       </button>
       <div className="small expense-list">
         {data?.items.map((item) => (
-          <div
-            className="d-flex align-items-center border-bottom py-1"
-            key={item.id}
-          >
-            <span className="flex-grow-1">
-              {item.description}{" "}
-              <span className="badge text-bg-light">{item.category}</span>
-            </span>
-            {item.kind === "수입" ? (
-              <strong className="me-2 text-success">
-                {item.amount.toLocaleString()}원
-              </strong>
-            ) : (
-              <strong className="me-2 text-danger">
-                {item.amount.toLocaleString()}원
-              </strong>
-            )}
-            <button
-              className="btn btn-link text-danger p-0"
-              onClick={async () => {
-                await noteApi.deleteExpense(item.id);
-                await reload();
-              }}
-            >
-              <i className="bi bi-trash" />
-            </button>
+          <div className="d-flex flex-column my-1" key={item.id}>
+            <div className="d-flex align-items-center p-0">
+              <span className="flex-grow-1">
+                {item.description}{" "}
+                <span className="badge text-bg-light">{item.category}</span>
+              </span>
+              {item.kind === "수입" ? (
+                <strong className="me-2 text-success">
+                  {item.amount.toLocaleString()}원
+                </strong>
+              ) : (
+                <strong className="me-2 text-danger">
+                  {item.amount.toLocaleString()}원
+                </strong>
+              )}
+              <button
+                className="btn btn-link text-danger p-0"
+                onClick={async () => {
+                  await noteApi.deleteExpense(item.id);
+                  await reload();
+                }}
+              >
+                <i className="bi bi-trash" />
+              </button>
+            </div>
+            <span className="text-muted small mb-1">{item.expenseDate}</span>
           </div>
         ))}
-      </div>
-      <div className="text-end fw-bold pt-2">
-        합계 {data?.total.toLocaleString() ?? 0}원
+        <h6 className="text-end fw-bold pt-2">
+          합계 {data?.total.toLocaleString() ?? 0}원
+        </h6>
       </div>
     </>
   );

@@ -308,7 +308,7 @@ export default function StickyNote() {
 
   return (
     <main
-      className="note-window min-vh-100 p-3"
+      className="note-window h-100 p-3"
       style={{
         backgroundColor: note.color,
       }}
