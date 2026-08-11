@@ -18,8 +18,7 @@ impl SqliteNoteRepository {
                 name TEXT NOT NULL,                
                 sort_order INTEGER NOT NULL DEFAULT 0,
                 created_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
-                updated_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),
-                FOREIGN KEY (parent_id) REFERENCES folders(id) ON DELETE SET NULL
+                updated_at TEXT NOT NULL DEFAULT (datetime('now', '+9 hours')),                
             );
 
             CREATE TABLE IF NOT EXISTS notes (
