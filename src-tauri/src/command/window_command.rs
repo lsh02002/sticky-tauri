@@ -5,6 +5,8 @@ use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowE
 #[tauri::command]
 pub async fn open_manager_window(app: AppHandle) -> Result<(), String> {
     if let Some(window) = app.get_webview_window("manager") {
+        window.unminimize().map_err(|e| e.to_string())?;
+        window.show().map_err(|e| e.to_string())?;
         window.set_focus().map_err(|e| e.to_string())?;
         return Ok(());
     }
