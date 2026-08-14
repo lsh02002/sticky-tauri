@@ -34,7 +34,6 @@ export default function MainManager() {
       const result = await noteApi.listFolders();
       setFolders(result);
 
-      await emit("folders-updated");
       setError("");
     } catch (error) {
       console.error(error);
@@ -275,6 +274,8 @@ export default function MainManager() {
                           editingFolderName,
                         );
 
+                        await emit("folders-updated");
+                        
                         setEditingFolderId(null);
                         void fetchFolders();
                       }
@@ -285,6 +286,8 @@ export default function MainManager() {
                     className="btn btn-success btn-sm"
                     onClick={async () => {
                       await noteApi.renameFolder(folder.id, editingFolderName);
+
+                      await emit("folders-updated");
 
                       setEditingFolderId(null);
                       void fetchFolders();
