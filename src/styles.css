@@ -75,10 +75,11 @@ body {
   overflow: auto;
 }
 .note-editor-panel {
-  min-height: calc(100vh - 79px);
+  min-height: calc(100vh - 80px);
   padding: 1rem;
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.24);
+  margin-top: 3rem;
 }
 .note-window .memo-textarea {
   min-height: calc(100vh - 190px);

@@ -312,10 +312,11 @@ export default function StickyNote() {
     <>
       <header
         data-tauri-drag-region
-        className="d-flex justify-content-between align-items-center gap-3 p-2"
+        className="d-flex justify-content-between align-items-center gap-3 p-2 position-fixed"
         style={{
           cursor: "grab",
           backgroundColor: `color-mix(in srgb, ${note.color} 95%, black 5%)`,
+          zIndex: 100,
         }}
       >
         <span
