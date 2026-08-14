@@ -204,7 +204,7 @@ impl SqliteNoteRepository {
 
     pub fn update_note_position_size(connection: &Connection, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> AppResult<()> {
         let changed = connection.execute(
-            "UPDATE notes SET x = ?1, y = ?2, width = ?3, height = ?4, updated_at = datetime('now', '+9 hours') WHERE id = ?5",
+            "UPDATE notes SET x = ?1, y = ?2, width = ?3, height = ?4 WHERE id = ?5",
             params![x, y, width, height, note_id],
         )?;
         if changed == 0 {
