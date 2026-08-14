@@ -46,10 +46,11 @@ impl NoteService {
     pub fn create_note(connection: &Connection, input: CreateNoteInput) -> AppResult<NoteSummary> {
         if input.title.trim().is_empty() {
             return Err(AppError::Validation("제목을 입력해주세요.".into()));
-        }        
+        }
         let note_type = input.note_type.as_str();
         let color = input.color.unwrap_or_else(|| "#fff59d".into());
-        let id = SqliteNoteRepository::create_note(connection, note_type, input.title.trim(), &color)?;
+        let folder_id = input.folder_id;
+        let id = SqliteNoteRepository::create_note(connection, note_type, input.title.trim(), &color, folder_id)?;
         if note_type == "text" {
             SqliteNoteRepository::create_text_detail(connection, id)?;
         }

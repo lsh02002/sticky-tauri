@@ -51,6 +51,7 @@ pub struct CreateNoteInput {
     pub note_type: NoteType,
     pub title: String,
     pub color: Option<String>,
+    pub folder_id: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]

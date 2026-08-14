@@ -24,9 +24,9 @@ export const noteApi = {
   renameFolder(folderId: number, newName: string) {
     return invoke<void>("rename_folder", { folderId, newName });
   },
-  createNote(noteType: NoteType, title: string, color?: string) {
+  createNote(noteType: NoteType, title: string, color?: string, folderId?: number) {
     return invoke<NoteSummary>("create_note", {
-      input: { noteType, title, color },
+      input: { noteType, title, color, folderId },
     });
   },
   setDeletedNote(noteId: number, isDeleted: boolean) {

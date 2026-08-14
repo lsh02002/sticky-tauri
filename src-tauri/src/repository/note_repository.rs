@@ -169,10 +169,10 @@ impl SqliteNoteRepository {
         })
     }
 
-    pub fn create_note(connection: &Connection, note_type: &str, title: &str, color: &str) -> AppResult<i64> {        
+    pub fn create_note(connection: &Connection, note_type: &str, title: &str, color: &str, folder_id: Option<i64>) -> AppResult<i64> {        
         connection.execute(
-            "INSERT INTO notes (note_type, title, color) VALUES (?1, ?2, ?3)",
-            params![note_type, title, color],
+            "INSERT INTO notes (note_type, title, color, folder_id) VALUES (?1, ?2, ?3, ?4)",
+            params![note_type, title, color, folder_id],
         )?;
         
         Ok(connection.last_insert_rowid())

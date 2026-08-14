@@ -230,6 +230,8 @@ export default function StickyNote() {
           folderId: folderId ? Number(folderId) : null,
         };
       });
+
+      await emit("note-folder-changed");
     } catch (reason) {
       console.error("폴더 변경 실패:", reason);
       setError(String(reason));

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { listen, emit } from "@tauri-apps/api/event";
 import { noteApi } from "../../api/noteApi";
 import { NoteListCard } from "../../components/card/NoteListCard";
@@ -18,6 +18,17 @@ export default function MainManager() {
   const [editingFolderId, setEditingFolderId] = useState<number | null>(null);
   const [editingFolderName, setEditingFolderName] = useState("");
 
+  const selectedFolderIdRef = useRef(selectedFolderId);
+  const searchQueryRef = useRef(searchQuery);
+
+  useEffect(() => {
+    selectedFolderIdRef.current = selectedFolderId;
+  }, [selectedFolderId]);
+
+  useEffect(() => {
+    searchQueryRef.current = searchQuery;
+  }, [searchQuery]);
+
   const fetchFolders = async () => {
     try {
       const result = await noteApi.listFolders();
@@ -34,24 +45,27 @@ export default function MainManager() {
     void fetchFolders();
   }, []);
 
-  async function reload(query = searchQuery, folderId = selectedFolderId) {
-    try {
-      let values: NoteSummary[];
+  const reload = useCallback(
+    async (query = searchQuery, folderId = selectedFolderId) => {
+      try {
+        let values: NoteSummary[];
 
-      if (query) {
-        values = await noteApi.searchNotes(query, folderId);
-      } else {
-        values = await noteApi.listNotes(
-          folderId != null ? Number(folderId) : null,
-        );
+        if (query) {
+          values = await noteApi.searchNotes(query, folderId);
+        } else {
+          values = await noteApi.listNotes(
+            folderId != null ? Number(folderId) : null,
+          );
+        }
+
+        setNotes(values);
+        setError("");
+      } catch (reason) {
+        setError(String(reason));
       }
-
-      setNotes(values);
-      setError("");
-    } catch (reason) {
-      setError(String(reason));
-    }
-  }
+    },
+    [searchQuery, selectedFolderId],
+  );
 
   useEffect(() => {
     void reload(searchQuery);
@@ -136,6 +150,21 @@ export default function MainManager() {
     };
   }, []);
 
+  useEffect(() => {
+    const unlisten = listen("note-folder-changed", async () => {
+      try {
+        await reload(searchQueryRef.current, selectedFolderIdRef.current);
+      } catch (error) {
+        console.error(error);
+        setError(String(error));
+      }
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
   async function create(noteType: NoteType) {
     if (creating !== null) {
       return;
@@ -154,7 +183,12 @@ export default function MainManager() {
               ? "새 가계부"
               : "새 사진 메모";
 
-      const note = await noteApi.createNote(noteType, title);
+      const note = await noteApi.createNote(
+        noteType,
+        title,
+        "#fff59d",
+        selectedFolderId ?? undefined,
+      );
 
       await reload();
       await noteApi.openNoteWindow(note.id);
