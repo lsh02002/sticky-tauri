@@ -427,7 +427,11 @@ export default function StickyNote() {
         }}
       >
         {error && (
-          <div className="alert alert-danger py-2" role="alert">
+          <div
+            className="alert alert-danger py-2"
+            style={{ marginTop: "3rem" }}
+            role="alert"
+          >
             {error}
           </div>
         )}
