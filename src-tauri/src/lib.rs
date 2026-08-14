@@ -62,69 +62,74 @@ pub fn run() {
             let menu = Menu::with_items(app, &[&manager, &quit])?;
             let icon = app.default_window_icon().unwrap().clone();
 
-            TrayIconBuilder::new()
-                .icon(icon)
-                .menu(&menu)
-                .show_menu_on_left_click(true)
-                .on_menu_event(|app, event| match event.id().as_ref() {
-                    "manager" => {
-                        if let Some(win) = app.get_webview_window("manager") {
-                            let _ = win.unminimize();
-                            let _ = win.show();
-                            let _ = win.set_focus();
-                        } else {
-                            let _ = WebviewWindowBuilder::new(
-                                app,
-                                "manager",
-                                WebviewUrl::App("/manager".into()),
-                            )
-                            .title("메모 관리")
-                            .inner_size(1000.0, 700.0)
-                            .visible(true)
-                            .build();
+            if app.tray_by_id("main-tray").is_none() {
+                TrayIconBuilder::with_id("main-tray")
+                    .icon(icon)
+                    .menu(&menu)
+                    .show_menu_on_left_click(true)
+                    .on_menu_event(|app, event| match event.id().as_ref() {
+                        "manager" => {
+                            if let Some(win) = app.get_webview_window("manager") {
+                                let _ = win.unminimize();
+                                let _ = win.show();
+                                let _ = win.set_focus();
+                            } else {
+                                let _ = WebviewWindowBuilder::new(
+                                    app,
+                                    "manager",
+                                    WebviewUrl::App("/manager".into()),
+                                )
+                                .title("메모 관리")
+                                .inner_size(1000.0, 700.0)
+                                .visible(true)
+                                .build();
+                            }
                         }
-                    }
-                    "quit" => {
-                        let state = app.state::<AppState>();
 
-                        if let Ok(connection) = state.connection() {
-                            for (label, window) in app.webview_windows() {
-                                if let Ok(position) = window.outer_position() {
-                                    let x = position.x as f64;
-                                    let y = position.y as f64;
-                                    
-                                    if label != "manager" {
-                                        if let Some(note_id) = label
-                                            .strip_prefix("note-")
-                                            .and_then(|id| id.parse::<i64>().ok())
-                                        {
-                                            if let Err(error) =
-                                                NoteService::update_note_position_size(
-                                                    &connection,
-                                                    note_id,
-                                                    x,
-                                                    y,
-                                                    window.outer_size().unwrap().width as f64,
-                                                    window.outer_size().unwrap().height as f64,
-                                                )
+                        "quit" => {
+                            let state = app.state::<AppState>();
+
+                            if let Ok(connection) = state.connection() {
+                                for (label, window) in app.webview_windows() {
+                                    if let Ok(position) = window.outer_position() {
+                                        let x = position.x as f64;
+                                        let y = position.y as f64;
+
+                                        if label != "manager" {
+                                            if let Some(note_id) = label
+                                                .strip_prefix("note-")
+                                                .and_then(|id| id.parse::<i64>().ok())
                                             {
-                                                eprintln!(
-                                                    "메모 위치 저장 실패 (note_id={}): {}",
-                                                    note_id,
-                                                    error
-                                                );
+                                                if let Ok(size) = window.outer_size() {
+                                                    if let Err(error) =
+                                                        NoteService::update_note_position_size(
+                                                            &connection,
+                                                            note_id,
+                                                            x,
+                                                            y,
+                                                            size.width as f64,
+                                                            size.height as f64,
+                                                        )
+                                                    {
+                                                        eprintln!(
+                                                            "메모 위치 저장 실패 (note_id={}): {}",
+                                                            note_id, error
+                                                        );
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
 
-                        app.exit(0);
-                        };
-                    }
-                    _ => {}
-                })
-                .build(app)?;
+                            app.exit(0);
+                        }
+
+                        _ => {}
+                    })
+                    .build(app)?;
+            }
 
             Ok(())
         })
