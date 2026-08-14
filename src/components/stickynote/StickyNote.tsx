@@ -312,7 +312,7 @@ export default function StickyNote() {
     <>
       <header
         data-tauri-drag-region
-        className="d-flex justify-content-between align-items-center gap-3 p-2 position-fixed"
+        className="w-100 d-flex justify-content-between align-items-center gap-3 p-2 position-fixed"
         style={{
           cursor: "grab",
           backgroundColor: `color-mix(in srgb, ${note.color} 95%, black 5%)`,
@@ -327,7 +327,7 @@ export default function StickyNote() {
           관리창
         </span>
 
-        <div className="w-100 d-flex align-items-center justify-content-center gap-2 px-2">
+        <div className="w-100 d-flex align-items-center justify-content-center gap-2 mx-2">
           <div className="w-100 d-flex align-items-center gap-2">
             <input
               className="form-control form-control-sm"
