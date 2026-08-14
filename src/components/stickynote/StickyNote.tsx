@@ -319,9 +319,8 @@ export default function StickyNote() {
         }}
       >
         <span
-          data-tauri-drag-region
           className="badge text-bg-dark"
-          style={{ cursor: "grab" }}
+          style={{ cursor: "pointer" }}
           onClick={() => noteApi.openManagerWindow()}
         >
           관리창
