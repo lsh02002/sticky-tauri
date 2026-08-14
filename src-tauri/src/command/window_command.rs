@@ -1,6 +1,8 @@
 use crate::{service::NoteService, AppState};
 use tauri::webview::Color;
-use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent, LogicalPosition};
+use tauri::{
+    AppHandle, LogicalPosition, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent,
+};
 
 #[tauri::command]
 pub async fn open_manager_window(app: AppHandle) -> Result<(), String> {
@@ -24,7 +26,11 @@ pub async fn open_manager_window(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn open_note_window(app: AppHandle, state: State<'_, AppState>, note_id: i64) -> Result<(), String> {
+pub async fn open_note_window(
+    app: AppHandle,
+    state: State<'_, AppState>,
+    note_id: i64,
+) -> Result<(), String> {
     let note = {
         let connection = state.connection()?;
 
@@ -41,8 +47,10 @@ pub async fn open_note_window(app: AppHandle, state: State<'_, AppState>, note_i
     if let Some(window) = app.get_webview_window(&label) {
         window.unminimize().map_err(|error| error.to_string())?;
         window.show().map_err(|error| error.to_string())?;
-        window.set_position(position).map_err(|error| error.to_string())?;
-        window.set_focus().map_err(|error| error.to_string())?;        
+        window
+            .set_position(position)
+            .map_err(|error| error.to_string())?;
+        window.set_focus().map_err(|error| error.to_string())?;
 
         return Ok(());
     }
@@ -67,67 +75,55 @@ pub async fn open_note_window(app: AppHandle, state: State<'_, AppState>, note_i
     let event_note_id = note.id;
     let event_window = window.clone();
 
-    window.on_window_event(move |event| {
-        match event {
-            WindowEvent::CloseRequested { .. } => {
-                let state = app_handle.state::<AppState>();
+    window.on_window_event(move |event| match event {
+        WindowEvent::CloseRequested { .. } => {
+            let state = app_handle.state::<AppState>();
 
-                match state.connection() {
-                    Ok(connection) => {
-                        if let Ok(position) = event_window.outer_position() {
-                            let x = position.x as f64;
-                            let y = position.y as f64;
+            match state.connection() {
+                Ok(connection) => {
+                    if let Ok(position) = event_window.outer_position() {
+                        let x = position.x as f64;
+                        let y = position.y as f64;
 
-                            if let Err(error) =
-                                NoteService::update_note_position_size(&connection, event_note_id, x, y, event_window.outer_size().unwrap().width as f64, event_window.outer_size().unwrap().height as f64)
-                            {
-                                eprintln!(
-                                    "메모 위치 저장 실패 (note_id={}): {}",
-                                    event_note_id,
-                                    error
-                                );
-                            }
+                        if let Err(error) = NoteService::update_note_position_size(
+                            &connection,
+                            event_note_id,
+                            x,
+                            y,
+                            event_window.outer_size().unwrap().width as f64,
+                            event_window.outer_size().unwrap().height as f64,
+                        ) {
+                            eprintln!("메모 위치 저장 실패 (note_id={}): {}", event_note_id, error);
                         }
                     }
+                }
 
-                    Err(error) => {
-                        eprintln!(
-                            "DB 연결 실패 (note_id={}): {}",
-                            event_note_id,
-                            error
-                        );
-                    }
-                };
-            }
-
-            WindowEvent::Destroyed => {
-                let state = app_handle.state::<AppState>();
-
-                match state.connection() {
-                    Ok(connection) => {
-                        if let Err(error) =
-                            NoteService::set_open(&connection, event_note_id, false)
-                        {
-                            eprintln!(
-                                "메모 open 상태 변경 실패 (note_id={}): {}",
-                                event_note_id,
-                                error
-                            );
-                        }
-                    }
-
-                    Err(error) => {
-                        eprintln!(
-                            "DB 연결 실패 (note_id={}): {}",
-                            event_note_id,
-                            error
-                        );
-                    }
-                };
-            }
-
-            _ => {}
+                Err(error) => {
+                    eprintln!("DB 연결 실패 (note_id={}): {}", event_note_id, error);
+                }
+            };
         }
+
+        WindowEvent::Destroyed => {
+            let state = app_handle.state::<AppState>();
+
+            match state.connection() {
+                Ok(connection) => {
+                    if let Err(error) = NoteService::set_open(&connection, event_note_id, false) {
+                        eprintln!(
+                            "메모 open 상태 변경 실패 (note_id={}): {}",
+                            event_note_id, error
+                        );
+                    }
+                }
+
+                Err(error) => {
+                    eprintln!("DB 연결 실패 (note_id={}): {}", event_note_id, error);
+                }
+            };
+        }
+
+        _ => {}
     });
 
     Ok(())

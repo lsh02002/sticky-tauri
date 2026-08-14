@@ -1,6 +1,6 @@
+use crate::domain::{CreateFolderRequest, Folder};
+use crate::repository::SqliteNoteRepository;
 use rusqlite::Connection;
-use crate::repository::{SqliteNoteRepository};
-use crate::domain::{Folder, CreateFolderRequest};
 
 use crate::{
     domain::{
@@ -8,7 +8,7 @@ use crate::{
         NoteSummary, PhotoItem, PhotoNote, TextNote, TodoItem, TodoNote, ToggleTodoInput,
         UpdateNoteColorInput, UpdateTextNoteInput,
     },
-    error::{AppError, AppResult},    
+    error::{AppError, AppResult},
 };
 
 pub struct NoteService;
@@ -22,7 +22,11 @@ impl NoteService {
         SqliteNoteRepository::find_all_folders(connection)
     }
 
-    pub fn set_folder(connection: &Connection, note_id: i64, folder_id: Option<i64>) -> AppResult<()> {
+    pub fn set_folder(
+        connection: &Connection,
+        note_id: i64,
+        folder_id: Option<i64>,
+    ) -> AppResult<()> {
         SqliteNoteRepository::set_folder(connection, note_id, folder_id)
     }
 
@@ -50,7 +54,13 @@ impl NoteService {
         let note_type = input.note_type.as_str();
         let color = input.color.unwrap_or_else(|| "#fff59d".into());
         let folder_id = input.folder_id;
-        let id = SqliteNoteRepository::create_note(connection, note_type, input.title.trim(), &color, folder_id)?;
+        let id = SqliteNoteRepository::create_note(
+            connection,
+            note_type,
+            input.title.trim(),
+            &color,
+            folder_id,
+        )?;
         if note_type == "text" {
             SqliteNoteRepository::create_text_detail(connection, id)?;
         }
@@ -58,7 +68,10 @@ impl NoteService {
             .ok_or_else(|| AppError::NotFound("생성된 메모".into()))
     }
 
-    pub fn list_notes(connection: &Connection, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
+    pub fn list_notes(
+        connection: &Connection,
+        folder_id: Option<i64>,
+    ) -> AppResult<Vec<NoteSummary>> {
         SqliteNoteRepository::list_notes(connection, folder_id)
     }
 
@@ -70,7 +83,11 @@ impl NoteService {
         SqliteNoteRepository::list_deleted_notes(connection)
     }
 
-    pub fn search_notes(connection: &Connection, query: &str, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
+    pub fn search_notes(
+        connection: &Connection,
+        query: &str,
+        folder_id: Option<i64>,
+    ) -> AppResult<Vec<NoteSummary>> {
         SqliteNoteRepository::search_notes(connection, query, folder_id)
     }
 
@@ -83,11 +100,22 @@ impl NoteService {
         SqliteNoteRepository::set_open(connection, note_id, open)
     }
 
-    pub fn set_is_deleted(connection: &Connection, note_id: i64, is_deleted: bool) -> AppResult<()> {
+    pub fn set_is_deleted(
+        connection: &Connection,
+        note_id: i64,
+        is_deleted: bool,
+    ) -> AppResult<()> {
         SqliteNoteRepository::set_is_deleted(connection, note_id, is_deleted)
     }
 
-    pub fn update_note_position_size(connection: &Connection, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> AppResult<()> {
+    pub fn update_note_position_size(
+        connection: &Connection,
+        note_id: i64,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+    ) -> AppResult<()> {
         SqliteNoteRepository::update_note_position_size(connection, note_id, x, y, width, height)
     }
 
@@ -108,11 +136,7 @@ impl NoteService {
 
     pub fn update_text(connection: &mut Connection, input: UpdateTextNoteInput) -> AppResult<()> {
         Self::require_type(connection, input.note_id, "text")?;
-        SqliteNoteRepository::update_text(
-            connection,
-            input.note_id,            
-            &input.content,
-        )
+        SqliteNoteRepository::update_text(connection, input.note_id, &input.content)
     }
 
     pub fn get_todo(connection: &Connection, note_id: i64) -> AppResult<TodoNote> {

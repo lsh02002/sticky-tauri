@@ -10,6 +10,7 @@ use std::{
 };
 
 use rusqlite::Connection;
+
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
@@ -32,7 +33,52 @@ impl AppState {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let mut builder = tauri::Builder::default();
+
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(
+            tauri_plugin_single_instance::init(|app, _args, _cwd| {
+                let has_note_window = app
+                    .webview_windows()
+                    .keys()
+                    .any(|label| label.starts_with("note-"));
+
+                // 노트 윈도우가 하나라도 있으면 아무것도 안 함
+                if has_note_window {
+                    return;
+                }
+
+                // 노트 윈도우가 하나도 없을 때만 manager 표시
+                if let Some(window) = app.get_webview_window("manager") {
+                    let _ = window.unminimize();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                } else {
+                    match WebviewWindowBuilder::new(
+                        app,
+                        "manager",
+                        WebviewUrl::App("/manager".into()),
+                    )
+                    .title("메모 관리")
+                    .inner_size(1000.0, 700.0)
+                    .visible(true)
+                    .build()
+                    {
+                        Ok(window) => {
+                            let _ = window.set_focus();
+                        }
+
+                        Err(error) => {
+                            eprintln!("메모 관리자 창 생성 실패: {}", error);
+                        }
+                    }
+                }
+            }),
+        );
+    }
+
+    builder
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
             let data_dir = app
@@ -58,75 +104,95 @@ pub fn run() {
 
             let manager =
                 MenuItem::with_id(app, "manager", "메모 관리자 열기", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&manager, &quit])?;
-            let icon = app.default_window_icon().unwrap().clone();
 
+            let quit = MenuItem::with_id(app, "quit", "종료", true, None::<&str>)?;
+
+            let menu = Menu::with_items(app, &[&manager, &quit])?;
+
+            let icon = app
+                .default_window_icon()
+                .expect("기본 앱 아이콘이 없습니다.")
+                .clone();
+
+            // 혹시 같은 프로세스 안에서 setup 로직이 다시 호출되더라도
+            // tray 중복 생성을 방지
             if app.tray_by_id("main-tray").is_none() {
                 TrayIconBuilder::with_id("main-tray")
                     .icon(icon)
                     .menu(&menu)
                     .show_menu_on_left_click(true)
-                    .on_menu_event(|app, event| match event.id().as_ref() {
-                        "manager" => {
-                            if let Some(win) = app.get_webview_window("manager") {
-                                let _ = win.unminimize();
-                                let _ = win.show();
-                                let _ = win.set_focus();
-                            } else {
-                                let _ = WebviewWindowBuilder::new(
-                                    app,
-                                    "manager",
-                                    WebviewUrl::App("/manager".into()),
-                                )
-                                .title("메모 관리")
-                                .inner_size(1000.0, 700.0)
-                                .visible(true)
-                                .build();
-                            }
-                        }
-
-                        "quit" => {
-                            let state = app.state::<AppState>();
-
-                            if let Ok(connection) = state.connection() {
-                                for (label, window) in app.webview_windows() {
-                                    if let Ok(position) = window.outer_position() {
-                                        let x = position.x as f64;
-                                        let y = position.y as f64;
-
-                                        if label != "manager" {
-                                            if let Some(note_id) = label
-                                                .strip_prefix("note-")
-                                                .and_then(|id| id.parse::<i64>().ok())
-                                            {
-                                                if let Ok(size) = window.outer_size() {
-                                                    if let Err(error) =
-                                                        NoteService::update_note_position_size(
-                                                            &connection,
-                                                            note_id,
-                                                            x,
-                                                            y,
-                                                            size.width as f64,
-                                                            size.height as f64,
-                                                        )
-                                                    {
-                                                        eprintln!(
-                                                            "메모 위치 저장 실패 (note_id={}): {}",
-                                                            note_id, error
-                                                        );
-                                                    }
-                                                }
-                                            }
-                                        }
+                    .on_menu_event(|app, event| {
+                        match event.id().as_ref() {
+                            "manager" => {
+                                if let Some(win) = app.get_webview_window("manager") {
+                                    let _ = win.unminimize();
+                                    let _ = win.show();
+                                    let _ = win.set_focus();
+                                } else {
+                                    if let Err(error) = WebviewWindowBuilder::new(
+                                        app,
+                                        "manager",
+                                        WebviewUrl::App("/manager".into()),
+                                    )
+                                    .title("메모 관리")
+                                    .inner_size(1000.0, 700.0)
+                                    .visible(true)
+                                    .build()
+                                    {
+                                        eprintln!("메모 관리자 창 생성 실패: {}", error);
                                     }
                                 }
                             }
+                            "quit" => {
+                                let state = app.state::<AppState>();
 
-                            app.exit(0);
+                                if let Ok(connection) = state.connection() {
+                                    for (label, window) in app.webview_windows() {
+                                        // manager 창은 메모 위치 저장 대상 아님
+                                        if label == "manager" {
+                                            continue;
+                                        }
+
+                                        let Some(note_id) = label
+                                            .strip_prefix("note-")
+                                            .and_then(|id| id.parse::<i64>().ok())
+                                        else {
+                                            continue;
+                                        };
+
+                                        let Ok(position) = window.outer_position() else {
+                                            continue;
+                                        };
+
+                                        let Ok(size) = window.outer_size() else {
+                                            continue;
+                                        };
+
+                                        let x = position.x as f64;
+                                        let y = position.y as f64;
+
+                                        if let Err(error) = NoteService::update_note_position_size(
+                                            &connection,
+                                            note_id,
+                                            x,
+                                            y,
+                                            size.width as f64,
+                                            size.height as f64,
+                                        ) {
+                                            eprintln!(
+                                                "메모 위치 저장 실패 \
+                                                 (note_id={}): {}",
+                                                note_id, error
+                                            );
+                                        }
+                                    }
+                                }
+
+                                app.exit(0);
+                            }
+
+                            _ => {}
                         }
-
-                        _ => {}
                     })
                     .build(app)?;
             }
@@ -163,7 +229,6 @@ pub fn run() {
             command::open_manager_window,
             command::open_note_window,
         ])
-        .plugin(tauri_plugin_dialog::init())
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

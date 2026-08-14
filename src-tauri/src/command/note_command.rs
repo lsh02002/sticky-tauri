@@ -2,17 +2,19 @@ use tauri::State;
 
 use crate::{
     domain::{
-        AddExpenseInput, AddPhotoInput, AddTodoInput, CreateNoteInput, ExpenseItem, ExpenseNote,
-        NoteSummary, PhotoItem, PhotoNote, TextNote, TodoItem, TodoNote, ToggleTodoInput,
-        UpdateNoteColorInput, UpdateTextNoteInput, SetDeletedNoteInput, CreateFolderRequest,
-        Folder,
+        AddExpenseInput, AddPhotoInput, AddTodoInput, CreateFolderRequest, CreateNoteInput,
+        ExpenseItem, ExpenseNote, Folder, NoteSummary, PhotoItem, PhotoNote, SetDeletedNoteInput,
+        TextNote, TodoItem, TodoNote, ToggleTodoInput, UpdateNoteColorInput, UpdateTextNoteInput,
     },
     service::NoteService,
     AppState,
 };
 
 #[tauri::command]
-pub async fn create_folder(state: State<'_, AppState>, input: CreateFolderRequest) -> Result<Folder, String> {
+pub async fn create_folder(
+    state: State<'_, AppState>,
+    input: CreateFolderRequest,
+) -> Result<Folder, String> {
     let db = state.connection()?;
     NoteService::create_folder(&db, input).map_err(|e| e.to_string())
 }
@@ -24,25 +26,39 @@ pub async fn list_folders(state: State<'_, AppState>) -> Result<Vec<Folder>, Str
 }
 
 #[tauri::command]
-pub async fn set_folder(state: State<'_, AppState>, note_id: i64, folder_id: Option<i64>) -> Result<(), String> {
+pub async fn set_folder(
+    state: State<'_, AppState>,
+    note_id: i64,
+    folder_id: Option<i64>,
+) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::set_folder(&db, note_id, folder_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn rename_folder(state: State<'_, AppState>, folder_id: i64, new_name: String) -> Result<(), String> {
+pub async fn rename_folder(
+    state: State<'_, AppState>,
+    folder_id: i64,
+    new_name: String,
+) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::rename_folder(&db, folder_id, &new_name).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn create_note(state: State<'_, AppState>, input: CreateNoteInput) -> Result<NoteSummary, String> {
+pub async fn create_note(
+    state: State<'_, AppState>,
+    input: CreateNoteInput,
+) -> Result<NoteSummary, String> {
     let db = state.connection()?;
     NoteService::create_note(&db, input).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn list_notes(state: State<'_, AppState>, folder_id: Option<i64>) -> Result<Vec<NoteSummary>, String> {
+pub async fn list_notes(
+    state: State<'_, AppState>,
+    folder_id: Option<i64>,
+) -> Result<Vec<NoteSummary>, String> {
     let db = state.connection()?;
     NoteService::list_notes(&db, folder_id).map_err(|e| e.to_string())
 }
@@ -60,25 +76,44 @@ pub async fn list_deleted_notes(state: State<'_, AppState>) -> Result<Vec<NoteSu
 }
 
 #[tauri::command]
-pub async fn search_notes(state: State<'_, AppState>, query: String, folder_id: Option<i64>) -> Result<Vec<NoteSummary>, String> {
+pub async fn search_notes(
+    state: State<'_, AppState>,
+    query: String,
+    folder_id: Option<i64>,
+) -> Result<Vec<NoteSummary>, String> {
     let db = state.connection()?;
     NoteService::search_notes(&db, &query, folder_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn set_deleted_note(state: State<'_, AppState>, input: SetDeletedNoteInput) -> Result<(), String> {
+pub async fn set_deleted_note(
+    state: State<'_, AppState>,
+    input: SetDeletedNoteInput,
+) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::set_is_deleted(&db, input.note_id, input.is_deleted).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn update_note_position_size(state: State<'_, AppState>, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> Result<(), String> {
+pub async fn update_note_position_size(
+    state: State<'_, AppState>,
+    note_id: i64,
+    x: f64,
+    y: f64,
+    width: f64,
+    height: f64,
+) -> Result<(), String> {
     let db = state.connection()?;
-    NoteService::update_note_position_size(&db, note_id, x, y, width, height).map_err(|e| e.to_string())
+    NoteService::update_note_position_size(&db, note_id, x, y, width, height)
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn update_note_title(state: State<'_, AppState>, note_id: i64, title: String) -> Result<bool, String> {
+pub async fn update_note_title(
+    state: State<'_, AppState>,
+    note_id: i64,
+    title: String,
+) -> Result<bool, String> {
     let db = state.connection()?;
     NoteService::update_title(&db, note_id, &title).map_err(|e| e.to_string())
 }
@@ -90,7 +125,10 @@ pub async fn get_text_note(state: State<'_, AppState>, note_id: i64) -> Result<T
 }
 
 #[tauri::command]
-pub async fn update_text_note(state: State<'_, AppState>, input: UpdateTextNoteInput) -> Result<(), String> {
+pub async fn update_text_note(
+    state: State<'_, AppState>,
+    input: UpdateTextNoteInput,
+) -> Result<(), String> {
     let mut db = state.connection()?;
     NoteService::update_text(&mut *db, input).map_err(|e| e.to_string())
 }
@@ -102,13 +140,19 @@ pub async fn get_todo_note(state: State<'_, AppState>, note_id: i64) -> Result<T
 }
 
 #[tauri::command]
-pub async fn add_todo_item(state: State<'_, AppState>, input: AddTodoInput) -> Result<TodoItem, String> {
+pub async fn add_todo_item(
+    state: State<'_, AppState>,
+    input: AddTodoInput,
+) -> Result<TodoItem, String> {
     let db = state.connection()?;
     NoteService::add_todo(&db, input).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn toggle_todo_item(state: State<'_, AppState>, input: ToggleTodoInput) -> Result<(), String> {
+pub async fn toggle_todo_item(
+    state: State<'_, AppState>,
+    input: ToggleTodoInput,
+) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::toggle_todo(&db, input).map_err(|e| e.to_string())
 }
@@ -120,13 +164,19 @@ pub async fn delete_todo_item(state: State<'_, AppState>, item_id: i64) -> Resul
 }
 
 #[tauri::command]
-pub async fn get_expense_note(state: State<'_, AppState>, note_id: i64) -> Result<ExpenseNote, String> {
+pub async fn get_expense_note(
+    state: State<'_, AppState>,
+    note_id: i64,
+) -> Result<ExpenseNote, String> {
     let db = state.connection()?;
     NoteService::get_expense(&db, note_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub async fn add_expense_item(state: State<'_, AppState>, input: AddExpenseInput) -> Result<ExpenseItem, String> {
+pub async fn add_expense_item(
+    state: State<'_, AppState>,
+    input: AddExpenseInput,
+) -> Result<ExpenseItem, String> {
     let db = state.connection()?;
     NoteService::add_expense(&db, input).map_err(|e| e.to_string())
 }
@@ -138,7 +188,10 @@ pub async fn delete_expense_item(state: State<'_, AppState>, item_id: i64) -> Re
 }
 
 #[tauri::command]
-pub async fn add_photo(state: State<'_, AppState>, input: AddPhotoInput) -> Result<PhotoItem, String> {
+pub async fn add_photo(
+    state: State<'_, AppState>,
+    input: AddPhotoInput,
+) -> Result<PhotoItem, String> {
     let db = state.connection()?;
     NoteService::add_photo(&db, input).map_err(|e| e.to_string())
 }
@@ -156,7 +209,10 @@ pub async fn delete_photo(state: State<'_, AppState>, photo_id: i64) -> Result<(
 }
 
 #[tauri::command]
-pub async fn update_note_color(state: State<'_, AppState>, input: UpdateNoteColorInput) -> Result<(), String> {
+pub async fn update_note_color(
+    state: State<'_, AppState>,
+    input: UpdateNoteColorInput,
+) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::update_color(&db, input).map_err(|e| e.to_string())
 }

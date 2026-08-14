@@ -12,5 +12,5 @@ pub struct Folder {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateFolderRequest {
-    pub name: String,    
+    pub name: String,
 }

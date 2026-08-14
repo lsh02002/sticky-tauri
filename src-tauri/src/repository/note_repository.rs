@@ -1,8 +1,8 @@
-use rusqlite::{params, Connection, OptionalExtension, Row};
 use crate::{
-    domain::{ExpenseItem, NoteSummary, PhotoItem, TodoItem, Folder, CreateFolderRequest},
+    domain::{CreateFolderRequest, ExpenseItem, Folder, NoteSummary, PhotoItem, TodoItem},
     error::{AppError, AppResult},
 };
+use rusqlite::{params, Connection, OptionalExtension, Row};
 
 pub struct SqliteNoteRepository;
 
@@ -88,19 +88,16 @@ impl SqliteNoteRepository {
 
         let id = connection.last_insert_rowid();
 
-        let folder = connection.query_row(
-            "SELECT * FROM folders WHERE id = ?1",
-            params![id],
-            |row| {
+        let folder =
+            connection.query_row("SELECT * FROM folders WHERE id = ?1", params![id], |row| {
                 Ok(Folder {
                     id: row.get("id")?,
-                    name: row.get("name")?,                    
+                    name: row.get("name")?,
                     sort_order: row.get("sort_order")?,
                     created_at: row.get("created_at")?,
                     updated_at: row.get("updated_at")?,
                 })
-            },
-        )?;
+            })?;
 
         Ok(folder)
     }
@@ -118,7 +115,7 @@ impl SqliteNoteRepository {
             .query_map([], |row| {
                 Ok(Folder {
                     id: row.get("id")?,
-                    name: row.get("name")?,                    
+                    name: row.get("name")?,
                     sort_order: row.get("sort_order")?,
                     created_at: row.get("created_at")?,
                     updated_at: row.get("updated_at")?,
@@ -129,7 +126,11 @@ impl SqliteNoteRepository {
         Ok(folders)
     }
 
-    pub fn set_folder(connection: &Connection, note_id: i64, folder_id: Option<i64>) -> AppResult<()> {
+    pub fn set_folder(
+        connection: &Connection,
+        note_id: i64,
+        folder_id: Option<i64>,
+    ) -> AppResult<()> {
         let changed = connection.execute(
             "UPDATE notes SET folder_id = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![folder_id, note_id],
@@ -169,12 +170,18 @@ impl SqliteNoteRepository {
         })
     }
 
-    pub fn create_note(connection: &Connection, note_type: &str, title: &str, color: &str, folder_id: Option<i64>) -> AppResult<i64> {        
+    pub fn create_note(
+        connection: &Connection,
+        note_type: &str,
+        title: &str,
+        color: &str,
+        folder_id: Option<i64>,
+    ) -> AppResult<i64> {
         connection.execute(
             "INSERT INTO notes (note_type, title, color, folder_id) VALUES (?1, ?2, ?3, ?4)",
             params![note_type, title, color, folder_id],
         )?;
-        
+
         Ok(connection.last_insert_rowid())
     }
 
@@ -194,7 +201,11 @@ impl SqliteNoteRepository {
         Ok(())
     }
 
-    pub fn set_is_deleted(connection: &Connection, note_id: i64, is_deleted: bool) -> AppResult<()> {
+    pub fn set_is_deleted(
+        connection: &Connection,
+        note_id: i64,
+        is_deleted: bool,
+    ) -> AppResult<()> {
         connection.execute(
             "UPDATE notes SET is_deleted = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
             params![is_deleted, note_id],
@@ -202,7 +213,14 @@ impl SqliteNoteRepository {
         Ok(())
     }
 
-    pub fn update_note_position_size(connection: &Connection, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> AppResult<()> {
+    pub fn update_note_position_size(
+        connection: &Connection,
+        note_id: i64,
+        x: f64,
+        y: f64,
+        width: f64,
+        height: f64,
+    ) -> AppResult<()> {
         let changed = connection.execute(
             "UPDATE notes SET x = ?1, y = ?2, width = ?3, height = ?4 WHERE id = ?5",
             params![x, y, width, height, note_id],
@@ -214,11 +232,10 @@ impl SqliteNoteRepository {
     }
 
     pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<bool> {
-        let current_title: String = connection.query_row(
-            "SELECT title FROM notes WHERE id = ?1",
-            [note_id],
-            |row| row.get(0),
-        )?;
+        let current_title: String =
+            connection.query_row("SELECT title FROM notes WHERE id = ?1", [note_id], |row| {
+                row.get(0)
+            })?;
 
         if title == current_title {
             return Ok(false); // No changes needed
@@ -239,7 +256,10 @@ impl SqliteNoteRepository {
         Ok(true)
     }
 
-    pub fn list_notes(connection: &Connection, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
+    pub fn list_notes(
+        connection: &Connection,
+        folder_id: Option<i64>,
+    ) -> AppResult<Vec<NoteSummary>> {
         let mut stmt = connection.prepare(
             "SELECT id, note_type, title, color, x, y, width, height, folder_id, open, is_deleted, created_at, updated_at
              FROM notes WHERE is_deleted = 0 AND (?1 IS NULL OR folder_id = ?1) ORDER BY updated_at DESC, id DESC",
@@ -276,7 +296,11 @@ impl SqliteNoteRepository {
         Ok(values)
     }
 
-    pub fn search_notes(connection: &Connection, query: &str, folder_id: Option<i64>) -> AppResult<Vec<NoteSummary>> {
+    pub fn search_notes(
+        connection: &Connection,
+        query: &str,
+        folder_id: Option<i64>,
+    ) -> AppResult<Vec<NoteSummary>> {
         let mut stmt = connection.prepare(
             "SELECT id, note_type, title, color, x, y, width, height, folder_id, open, is_deleted, created_at, updated_at
              FROM notes WHERE is_deleted = 0 AND (title LIKE ?1 OR updated_at LIKE ?1)
@@ -284,7 +308,10 @@ impl SqliteNoteRepository {
              ORDER BY updated_at DESC, id DESC",
         )?;
         let values = stmt
-            .query_map(params![format!("%{}%", query), folder_id], Self::row_to_note)?
+            .query_map(
+                params![format!("%{}%", query), folder_id],
+                Self::row_to_note,
+            )?
             .collect::<Result<Vec<_>, _>>()?;
         Ok(values)
     }
@@ -318,7 +345,7 @@ impl SqliteNoteRepository {
         )?)
     }
 
-    pub fn update_text(connection: &mut Connection, note_id: i64, content: &str) -> AppResult<()> {        
+    pub fn update_text(connection: &mut Connection, note_id: i64, content: &str) -> AppResult<()> {
         let tx = connection.transaction()?;
 
         let changed = tx.execute(
@@ -426,7 +453,15 @@ impl SqliteNoteRepository {
         Ok(items)
     }
 
-    pub fn add_expense(connection: &Connection, note_id: i64, description: &str, amount: i64, kind: &str, category: &str, expense_date: &str) -> AppResult<ExpenseItem> {
+    pub fn add_expense(
+        connection: &Connection,
+        note_id: i64,
+        description: &str,
+        amount: i64,
+        kind: &str,
+        category: &str,
+        expense_date: &str,
+    ) -> AppResult<ExpenseItem> {
         let position: i64 = connection.query_row(
             "SELECT COALESCE(MAX(position), -1) + 1 FROM expense_items WHERE note_id = ?1",
             params![note_id],
@@ -458,7 +493,11 @@ impl SqliteNoteRepository {
         Ok(())
     }
 
-    pub fn add_photo(connection: &Connection, note_id: i64, file_path: &str) -> AppResult<PhotoItem> {
+    pub fn add_photo(
+        connection: &Connection,
+        note_id: i64,
+        file_path: &str,
+    ) -> AppResult<PhotoItem> {
         let position: i64 = connection.query_row(
             "SELECT COALESCE(MAX(position), -1) + 1 FROM photo_items WHERE note_id = ?1",
             params![note_id],
