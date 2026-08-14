@@ -309,102 +309,101 @@ export default function StickyNote() {
   }
 
   return (
-    <main
-      data-tauri-drag-region
-      className="note-window h-100 p-3"
-      style={{
-        cursor: "grab",
-        backgroundColor: note.color,
-      }}
-    >
+    <>
       <header
         data-tauri-drag-region
-        className="d-flex align-items-center gap-2 mb-3"
+        className="d-flex justify-content-between align-items-center gap-3 p-2"
+        style={{
+          cursor: "grab",
+          backgroundColor: `color-mix(in srgb, ${note.color} 95%, black 5%)`,
+        }}
       >
         <span
           data-tauri-drag-region
           className="badge text-bg-dark"
+          style={{ cursor: "grab" }}
           onClick={() => noteApi.openManagerWindow()}
         >
           관리창
         </span>
 
-        <div className="d-flex align-items-center gap-2">
-          <input
-            className="form-control form-control-sm"
-            value={title}
-            onChange={async (e) => setTitle(e.target.value)}
-            onBlur={updateTitle}
-          />
-        </div>
+        <div className="w-100 d-flex align-items-center justify-content-center gap-2 px-2">
+          <div className="w-100 d-flex align-items-center gap-2">
+            <input
+              className="form-control form-control-sm"
+              value={title}
+              onChange={async (e) => setTitle(e.target.value)}
+              onBlur={updateTitle}
+            />
+          </div>
 
-        <div className="dropdown">
-          <button
-            type="button"
-            className="btn btn-sm btn-light"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-            title="메모 설정"
-          >
-            <i className="bi bi-three-dots-vertical" />
-          </button>
-
-          <div className="dropdown-menu dropdown-menu-end p-2">
-            <select
-              value={folderId}
-              onChange={(e) => {
-                setFolderId(e.target.value);
-                void changeFolder(e.target.value);
-              }}
-              className="form-select"
-            >
-              <option value="">폴더를 선택하세요</option>
-
-              {folderOptions.map((opt) => (
-                <option
-                  key={opt.value}
-                  value={opt.value}
-                  disabled={opt.disabled}
-                >
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <div className="d-flex gap-1 mb-2">
-              {colors.map((color) => {
-                const selected = note.color === color;
-
-                return (
-                  <button
-                    type="button"
-                    key={color}
-                    className="color-button"
-                    style={{
-                      backgroundColor: color,
-                    }}
-                    aria-label={`메모 배경색 ${color}`}
-                    disabled={changingColor}
-                    onClick={() => void changeColor(color)}
-                  >
-                    {selected && <i className="bi bi-check-lg color-check" />}
-                  </button>
-                );
-              })}
-            </div>
-
+          <div className="dropdown">
             <button
               type="button"
-              className="dropdown-item text-danger"
-              disabled={deleting}
-              onClick={() => void remove()}
+              className="btn btn-sm btn-light"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              title="메모 설정"
             >
-              {deleting ? (
-                <span className="spinner-border spinner-border-sm me-2" />
-              ) : (
-                <i className="bi bi-trash me-2" />
-              )}
-              삭제
+              <i className="bi bi-three-dots-vertical" />
             </button>
+
+            <div className="dropdown-menu dropdown-menu-end p-2">
+              <select
+                value={folderId}
+                onChange={(e) => {
+                  setFolderId(e.target.value);
+                  void changeFolder(e.target.value);
+                }}
+                className="form-select"
+              >
+                <option value="">폴더를 선택하세요</option>
+
+                {folderOptions.map((opt) => (
+                  <option
+                    key={opt.value}
+                    value={opt.value}
+                    disabled={opt.disabled}
+                  >
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <div className="d-flex gap-1 mb-2">
+                {colors.map((color) => {
+                  const selected = note.color === color;
+
+                  return (
+                    <button
+                      type="button"
+                      key={color}
+                      className="color-button"
+                      style={{
+                        backgroundColor: color,
+                      }}
+                      aria-label={`메모 배경색 ${color}`}
+                      disabled={changingColor}
+                      onClick={() => void changeColor(color)}
+                    >
+                      {selected && <i className="bi bi-check-lg color-check" />}
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                className="dropdown-item text-danger"
+                disabled={deleting}
+                onClick={() => void remove()}
+              >
+                {deleting ? (
+                  <span className="spinner-border spinner-border-sm me-2" />
+                ) : (
+                  <i className="bi bi-trash me-2" />
+                )}
+                삭제
+              </button>
+            </div>
           </div>
         </div>
 
@@ -419,29 +418,38 @@ export default function StickyNote() {
         </button>
       </header>
 
-      {error && (
-        <div className="alert alert-danger py-2" role="alert">
-          {error}
-        </div>
-      )}
-
-      <section className="note-editor-panel" style={{ cursor: "auto" }}>
-        {note.noteType === "text" && (
-          <TextMemo note={note} onChanged={() => void reload()} />
-        )}
-
-        {note.noteType === "todo" && <TodoMemo note={note} />}
-
-        {note.noteType === "expense" && <ExpenseMemo note={note} />}
-
-        {note.noteType === "photo" && <PhotoMemo note={note} />}
-
-        {!["text", "todo", "expense", "photo"].includes(note.noteType) && (
-          <div className="alert alert-danger">
-            지원하지 않는 메모 타입입니다: {note.noteType}
+      <main
+        data-tauri-drag-region
+        className="note-window h-100 p-3"
+        style={{
+          cursor: "grab",
+          backgroundColor: note.color,
+        }}
+      >
+        {error && (
+          <div className="alert alert-danger py-2" role="alert">
+            {error}
           </div>
         )}
-      </section>
-    </main>
+
+        <section className="note-editor-panel" style={{ cursor: "auto" }}>
+          {note.noteType === "text" && (
+            <TextMemo note={note} onChanged={() => void reload()} />
+          )}
+
+          {note.noteType === "todo" && <TodoMemo note={note} />}
+
+          {note.noteType === "expense" && <ExpenseMemo note={note} />}
+
+          {note.noteType === "photo" && <PhotoMemo note={note} />}
+
+          {!["text", "todo", "expense", "photo"].includes(note.noteType) && (
+            <div className="alert alert-danger">
+              지원하지 않는 메모 타입입니다: {note.noteType}
+            </div>
+          )}
+        </section>
+      </main>
+    </>
   );
 }
