@@ -87,6 +87,10 @@ impl NoteService {
         SqliteNoteRepository::set_is_deleted(connection, note_id, is_deleted)
     }
 
+    pub fn update_note_position_size(connection: &Connection, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> AppResult<()> {
+        SqliteNoteRepository::update_note_position_size(connection, note_id, x, y, width, height)
+    }
+
     pub fn update_title(connection: &Connection, note_id: i64, title: &str) -> AppResult<bool> {
         if title.trim().is_empty() {
             return Err(AppError::Validation("제목을 입력해주세요.".into()));

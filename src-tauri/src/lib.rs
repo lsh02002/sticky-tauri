@@ -16,6 +16,8 @@ use tauri::{
     Manager, WebviewUrl, WebviewWindowBuilder,
 };
 
+use service::NoteService;
+
 use crate::{error::AppError, repository::SqliteNoteRepository};
 
 pub struct AppState {
@@ -82,7 +84,44 @@ pub fn run() {
                             .build();
                         }
                     }
-                    "quit" => app.exit(0),
+                    "quit" => {
+                        let state = app.state::<AppState>();
+
+                        if let Ok(connection) = state.connection() {
+                            for (label, window) in app.webview_windows() {
+                                if let Ok(position) = window.outer_position() {
+                                    let x = position.x as f64;
+                                    let y = position.y as f64;
+                                    
+                                    if label != "manager" {
+                                        if let Some(note_id) = label
+                                            .strip_prefix("note-")
+                                            .and_then(|id| id.parse::<i64>().ok())
+                                        {
+                                            if let Err(error) =
+                                                NoteService::update_note_position_size(
+                                                    &connection,
+                                                    note_id,
+                                                    x,
+                                                    y,
+                                                    window.outer_size().unwrap().width as f64,
+                                                    window.outer_size().unwrap().height as f64,
+                                                )
+                                            {
+                                                eprintln!(
+                                                    "메모 위치 저장 실패 (note_id={}): {}",
+                                                    note_id,
+                                                    error
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                        app.exit(0);
+                        };
+                    }
                     _ => {}
                 })
                 .build(app)?;
@@ -96,6 +135,7 @@ pub fn run() {
             command::rename_folder,
             command::create_note,
             command::set_deleted_note,
+            command::update_note_position_size,
             command::update_note_title,
             command::list_notes,
             command::list_open_notes,

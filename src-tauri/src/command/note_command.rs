@@ -72,6 +72,12 @@ pub async fn set_deleted_note(state: State<'_, AppState>, input: SetDeletedNoteI
 }
 
 #[tauri::command]
+pub async fn update_note_position_size(state: State<'_, AppState>, note_id: i64, x: f64, y: f64, width: f64, height: f64) -> Result<(), String> {
+    let db = state.connection()?;
+    NoteService::update_note_position_size(&db, note_id, x, y, width, height).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn update_note_title(state: State<'_, AppState>, note_id: i64, title: String) -> Result<bool, String> {
     let db = state.connection()?;
     NoteService::update_title(&db, note_id, &title).map_err(|e| e.to_string())
