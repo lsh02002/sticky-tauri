@@ -150,6 +150,8 @@ export default function MainManager() {
     };
   }, []);
 
+  //이 useEffect가 처음 생성될 때 한번만 렌더링 되서 useRef를 사용하여
+  //selectedFolderId와 searchQuery를 참조하도록 변경
   useEffect(() => {
     const unlisten = listen("note-folder-changed", async () => {
       try {
