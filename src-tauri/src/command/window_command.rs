@@ -52,7 +52,7 @@ pub async fn open_note_window(app: AppHandle, state: State<'_, AppState>, note_i
         .inner_size(note.width.max(360.0), note.height.max(420.0))
         .min_inner_size(340.0, 360.0)
         .resizable(true)
-        .decorations(true)
+        .decorations(false)
         .visible(true)
         .skip_taskbar(true)
         .always_on_top(true)

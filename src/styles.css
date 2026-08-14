@@ -75,7 +75,7 @@ body {
   overflow: auto;
 }
 .note-editor-panel {
-  min-height: calc(100vh - 78px);
+  min-height: calc(100vh - 79px);
   padding: 1rem;
   border-radius: 0.9rem;
   background: rgba(255, 255, 255, 0.24);

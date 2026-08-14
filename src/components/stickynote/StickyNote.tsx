@@ -310,13 +310,19 @@ export default function StickyNote() {
 
   return (
     <main
+      data-tauri-drag-region
       className="note-window h-100 p-3"
       style={{
+        cursor: "grab",
         backgroundColor: note.color,
       }}
     >
-      <header className="d-flex align-items-center gap-2 mb-3">
+      <header
+        data-tauri-drag-region
+        className="d-flex align-items-center gap-2 mb-3"
+      >
         <span
+          data-tauri-drag-region
           className="badge text-bg-dark"
           onClick={() => noteApi.openManagerWindow()}
         >
@@ -419,7 +425,7 @@ export default function StickyNote() {
         </div>
       )}
 
-      <section className="note-editor-panel">
+      <section className="note-editor-panel" style={{ cursor: "auto" }}>
         {note.noteType === "text" && (
           <TextMemo note={note} onChanged={() => void reload()} />
         )}
