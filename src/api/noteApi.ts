@@ -100,8 +100,8 @@ export const noteApi = {
   listPhotos(noteId: number) {
     return invoke<PhotoNote>("list_photos", { noteId });
   },
-  deletePhoto(noteId: number, fileName: string) {
-    return invoke<void>("delete_photo", { input: { noteId, fileName } });
+  deletePhoto(photoId: number) {
+    return invoke<void>("delete_photo", { photoId });
   },
   openManagerWindow() {
     return invoke<void>("open_manager_window");

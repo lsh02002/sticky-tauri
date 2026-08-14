@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
 import type { ExpenseNote, NoteSummary } from "../../types/note";
+import { confirm } from "@tauri-apps/plugin-dialog";
 
 export function ExpenseMemo({ note }: { note: NoteSummary }) {
   const [data, setData] = useState<ExpenseNote | null>(null);
@@ -118,6 +119,10 @@ export function ExpenseMemo({ note }: { note: NoteSummary }) {
               <button
                 className="btn btn-link text-danger p-0"
                 onClick={async () => {
+                  const confirmed =
+                    await confirm("정말로 항목을 삭제하시겠습니까?");
+                  if (!confirmed) return;
+
                   await noteApi.deleteExpense(item.id);
                   await reload();
                 }}

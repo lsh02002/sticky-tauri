@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { convertFileSrc } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { confirm, open } from "@tauri-apps/plugin-dialog";
 
 import { noteApi } from "../../api/noteApi";
 import type { NoteSummary, PhotoItem, PhotoNote } from "../../types/note";
@@ -62,6 +62,20 @@ export function PhotoMemo({ note }: { note: NoteSummary }) {
     }
   }
 
+  async function removePhoto(photoId: number) {
+    try {
+      const confirmed = await confirm("정말로 사진을 삭제하시겠습니까?");
+      if (!confirmed) return;
+
+      setError("");
+      await noteApi.deletePhoto(photoId);
+      await loadPhotos();
+    } catch (error) {
+      console.error(error);
+      setError("사진을 삭제하지 못했습니다.");
+    }
+  }
+
   if (loading) {
     return <div className="text-muted">불러오는 중...</div>;
   }
@@ -94,7 +108,13 @@ export function PhotoMemo({ note }: { note: NoteSummary }) {
             .sort((a, b) => a.position - b.position)
             .map((item) => (
               <div key={item.id}>
-                <div className="card h-100">
+                <div className="card h-100 position-relative">
+                  <div className="position-absolute top-0 end-0 text-bg-danger">
+                    <i
+                      className="bi bi-x-lg"
+                      onClick={() => void removePhoto(item.id)}
+                    />
+                  </div>
                   <img
                     className="card-img-top"
                     src={convertFileSrc(item.filePath)}

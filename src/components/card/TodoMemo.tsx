@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
 import type { TodoItem, NoteSummary } from "../../types/note";
+import { confirm } from "@tauri-apps/plugin-dialog";
 
 export function TodoMemo({ note }: { note: NoteSummary }) {
   const [items, setItems] = useState<TodoItem[]>([]);
@@ -59,6 +60,10 @@ export function TodoMemo({ note }: { note: NoteSummary }) {
             <button
               className="btn btn-outline-danger btn-sm"
               onClick={async () => {
+                const confirmed =
+                  await confirm("정말로 할 일을 삭제하시겠습니까?");
+                if (!confirmed) return;
+
                 await noteApi.deleteTodo(item.id);
                 await reload();
               }}
