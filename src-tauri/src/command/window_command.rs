@@ -1,7 +1,7 @@
 use crate::{service::NoteService, AppState};
 use tauri::webview::Color;
 use tauri::{
-    AppHandle, LogicalPosition, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent,
+    AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
 
 #[tauri::command]
@@ -41,15 +41,10 @@ pub async fn open_note_window(
 
     let label = format!("note-{}", note.id);
 
-    let position = LogicalPosition::new(note.x, note.y);
-
     // 같은 메모 창이 이미 열려 있다면 새로 만들지 않음
     if let Some(window) = app.get_webview_window(&label) {
         window.unminimize().map_err(|error| error.to_string())?;
         window.show().map_err(|error| error.to_string())?;
-        window
-            .set_position(position)
-            .map_err(|error| error.to_string())?;
         window.set_focus().map_err(|error| error.to_string())?;
 
         return Ok(());
