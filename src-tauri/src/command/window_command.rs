@@ -31,15 +31,7 @@ pub async fn open_note_window(
     state: State<'_, AppState>,
     note_id: i64,
 ) -> Result<(), String> {
-    let note = {
-        let connection = state.connection()?;
-
-        NoteService::set_open(&connection, note_id, true).map_err(String::from)?;
-
-        NoteService::find(&connection, note_id).map_err(String::from)?
-    };
-
-    let label = format!("note-{}", note.id);
+    let label = format!("note-{}", note_id);
 
     // 같은 메모 창이 이미 열려 있다면 새로 만들지 않음
     if let Some(window) = app.get_webview_window(&label) {
@@ -49,6 +41,14 @@ pub async fn open_note_window(
 
         return Ok(());
     }
+
+    let note = {
+        let connection = state.connection()?;
+
+        NoteService::set_open(&connection, note_id, true).map_err(String::from)?;
+
+        NoteService::find(&connection, note_id).map_err(String::from)?
+    };
 
     // 쿼리스트링 없이 실제 index.html만 로드
     let url = WebviewUrl::App(format!("/note/{}", note.id).into());
