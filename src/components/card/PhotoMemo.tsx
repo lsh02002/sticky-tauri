@@ -81,7 +81,7 @@ export function PhotoMemo({ note }: { note: NoteSummary }) {
   }
 
   return (
-    <div>
+    <div className="p-3">
       {error && (
         <div className="alert alert-danger py-2" role="alert">
           {error}

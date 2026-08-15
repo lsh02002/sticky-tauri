@@ -22,7 +22,7 @@ export function TodoMemo({ note }: { note: NoteSummary }) {
   }
 
   return (
-    <>
+    <div className="p-3">
       <div className="input-group input-group-sm mb-2">
         <div className="w-100 d-flex">
           <input
@@ -73,6 +73,6 @@ export function TodoMemo({ note }: { note: NoteSummary }) {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }

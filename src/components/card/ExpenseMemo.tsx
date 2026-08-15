@@ -35,8 +35,8 @@ export function ExpenseMemo({ note }: { note: NoteSummary }) {
   }
 
   return (
-    <>
-      <div className="row g-1 mb-2">
+    <div className="p-3">
+      <div className="w-100 row mb-2">
         <div className="col-7">
           <input
             className="form-control form-control-sm"
@@ -137,6 +137,6 @@ export function ExpenseMemo({ note }: { note: NoteSummary }) {
           합계 {data?.total.toLocaleString() ?? 0}원
         </h6>
       </div>
-    </>
+    </div>
   );
 }

@@ -32,6 +32,12 @@ body {
   min-height: 190px;
   resize: vertical;
   background: rgba(255, 255, 255, 0.55);
+  &:focus {
+    background: rgba(255, 255, 255, 0.55);
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
 }
 .color-button {
   width: 28px;
@@ -75,14 +81,12 @@ body {
   overflow: auto;
 }
 .note-editor-panel {
-  min-height: calc(100vh - 80px);
-  padding: 1rem;
-  border-radius: 0.9rem;
-  background: rgba(255, 255, 255, 0.24);
+  height: calc(100vh - 49px);  
+  border-radius: 0.9rem;  
   margin-top: 3rem;
 }
 .note-window .memo-textarea {
-  min-height: calc(100vh - 190px);
+  min-height: calc(100vh - 88px);
 }
 .note-window .expense-list {
   max-height: 100%;
