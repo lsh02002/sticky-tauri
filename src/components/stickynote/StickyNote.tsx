@@ -27,8 +27,6 @@ export default function StickyNote() {
 
   const fetchFolders = async () => {
     try {
-      setLoading(true);
-
       const result = await noteApi.listFolders();
       setFolderOptions(
         result?.map((folder) => ({
@@ -38,8 +36,6 @@ export default function StickyNote() {
       );
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false);
     }
   };
 
