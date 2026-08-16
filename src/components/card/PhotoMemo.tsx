@@ -5,7 +5,7 @@ import { confirm, open } from "@tauri-apps/plugin-dialog";
 import { noteApi } from "../../api/noteApi";
 import type { NoteSummary, PhotoItem, PhotoNote } from "../../types/note";
 
-export function PhotoMemo({ note }: { note: NoteSummary }) {
+export function PhotoMemo({ noteId }: { noteId: number }) {
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -13,14 +13,14 @@ export function PhotoMemo({ note }: { note: NoteSummary }) {
 
   useEffect(() => {
     void loadPhotos();
-  }, [note.id]);
+  }, [noteId]);
 
   async function loadPhotos() {
     try {
       setLoading(true);
       setError("");
 
-      const value: PhotoNote = await noteApi.listPhotos(note.id);
+      const value: PhotoNote = await noteApi.listPhotos(noteId);
       setItems(value.items);
     } catch (error) {
       console.error(error);
@@ -52,7 +52,7 @@ export function PhotoMemo({ note }: { note: NoteSummary }) {
       // multiple: false이면 문자열 경로가 반환됨
       const filePath = selected;
 
-      await noteApi.addPhoto(note.id, filePath);
+      await noteApi.addPhoto(noteId, filePath);
       await loadPhotos();
     } catch (error) {
       console.error(error);

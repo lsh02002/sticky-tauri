@@ -3,20 +3,20 @@ import { noteApi } from "../../api/noteApi";
 import type { TodoItem, NoteSummary } from "../../types/note";
 import { confirm } from "@tauri-apps/plugin-dialog";
 
-export function TodoMemo({ note }: { note: NoteSummary }) {
+export function TodoMemo({ noteId }: { noteId: number }) {
   const [items, setItems] = useState<TodoItem[]>([]);
   const [content, setContent] = useState("");
 
   async function reload() {
-    setItems((await noteApi.getTodo(note.id)).items);
+    setItems((await noteApi.getTodo(noteId)).items);
   }
   useEffect(() => {
     void reload();
-  }, [note.id]);
+  }, [noteId]);
 
   async function add() {
     if (!content.trim()) return;
-    await noteApi.addTodo(note.id, content);
+    await noteApi.addTodo(noteId, content);
     setContent("");
     await reload();
   }

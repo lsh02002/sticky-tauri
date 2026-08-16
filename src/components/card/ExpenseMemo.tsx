@@ -3,7 +3,7 @@ import { noteApi } from "../../api/noteApi";
 import type { ExpenseNote, NoteSummary } from "../../types/note";
 import { confirm } from "@tauri-apps/plugin-dialog";
 
-export function ExpenseMemo({ note }: { note: NoteSummary }) {
+export function ExpenseMemo({ noteId }: { noteId: number }) {
   const [data, setData] = useState<ExpenseNote | null>(null);
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -12,17 +12,17 @@ export function ExpenseMemo({ note }: { note: NoteSummary }) {
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
 
   async function reload() {
-    setData(await noteApi.getExpense(note.id));
+    setData(await noteApi.getExpense(noteId));
   }
   useEffect(() => {
     void reload();
-  }, [note.id]);
+  }, [noteId]);
 
   async function add() {
     const parsed = Number(amount);
     if (!description.trim() || !Number.isInteger(parsed) || parsed <= 0) return;
     await noteApi.addExpense({
-      noteId: note.id,
+      noteId: noteId,
       description,
       amount: parsed,
       kind,

@@ -432,14 +432,14 @@ export default function StickyNote() {
 
         <section className="note-editor-panel">
           {note.noteType === "text" && (
-            <TextMemo note={note} onChanged={() => void reload()} />
+            <TextMemo noteId={note.id} onChanged={() => void reload()} />
           )}
 
-          {note.noteType === "todo" && <TodoMemo note={note} />}
+          {note.noteType === "todo" && <TodoMemo noteId={note.id} />}
 
-          {note.noteType === "expense" && <ExpenseMemo note={note} />}
+          {note.noteType === "expense" && <ExpenseMemo noteId={note.id} />}
 
-          {note.noteType === "photo" && <PhotoMemo note={note} />}
+          {note.noteType === "photo" && <PhotoMemo noteId={note.id} />}
 
           {!["text", "todo", "expense", "photo"].includes(note.noteType) && (
             <div className="alert alert-danger">

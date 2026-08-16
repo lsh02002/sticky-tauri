@@ -3,24 +3,24 @@ import { noteApi } from "../../api/noteApi";
 import type { NoteSummary } from "../../types/note";
 
 export function TextMemo({
-  note,
+  noteId,
   onChanged,
 }: {
-  note: NoteSummary;
+  noteId: number;
   onChanged: () => void;
 }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    noteApi.getText(note.id).then((value) => {      
+    noteApi.getText(noteId).then((value) => {      
       setContent(value.content);
       setLoading(false);
     });
-  }, [note.id]);
+  }, [noteId]);
 
   async function save() {
-    await noteApi.updateText(note.id, content);
+    await noteApi.updateText(noteId, content);
     onChanged();
   }
 
