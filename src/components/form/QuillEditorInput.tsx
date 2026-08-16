@@ -57,6 +57,7 @@ const QuillEditorInput = ({
       if (
         target.closest(".ql-color") ||
         target.closest(".ql-background") ||
+        target.closest(".ql-size") ||
         target.closest(".ql-picker-options")
       ) {
         e.preventDefault();
@@ -87,7 +88,7 @@ const QuillEditorInput = ({
         : {
             container: [
               [{ size: ["small", false, "large", "huge"] }],
-              ["bold", "italic", "underline", "strike"],              
+              ["bold", "italic", "underline", "strike"],
               [{ color: [] }, { background: [] }],
               [{ list: "ordered" }, { list: "bullet" }],
               ["blockquote", "link"],
