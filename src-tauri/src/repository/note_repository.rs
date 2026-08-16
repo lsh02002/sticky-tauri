@@ -255,6 +255,25 @@ impl SqliteNoteRepository {
 
         Ok(true)
     }
+    
+    pub fn update_color(connection: &Connection, note_id: i64, color: &str) -> AppResult<()> {
+        let changed = connection.execute(
+            "UPDATE notes SET color = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
+            params![color, note_id],
+        )?;
+        if changed == 0 {
+            return Err(AppError::NotFound("메모".into()));
+        }
+        Ok(())
+    }
+
+    pub fn delete_note(connection: &Connection, note_id: i64) -> AppResult<()> {
+        let changed = connection.execute("DELETE FROM notes WHERE id = ?1", params![note_id])?;
+        if changed == 0 {
+            return Err(AppError::NotFound("메모".into()));
+        }
+        Ok(())
+    }
 
     pub fn list_notes(
         connection: &Connection,
@@ -538,25 +557,6 @@ impl SqliteNoteRepository {
             connection.execute("DELETE FROM photo_items WHERE id = ?1", params![photo_id])?;
         if changed == 0 {
             return Err(AppError::NotFound("사진".into()));
-        }
-        Ok(())
-    }
-
-    pub fn update_color(connection: &Connection, note_id: i64, color: &str) -> AppResult<()> {
-        let changed = connection.execute(
-            "UPDATE notes SET color = ?1, updated_at = datetime('now', '+9 hours') WHERE id = ?2",
-            params![color, note_id],
-        )?;
-        if changed == 0 {
-            return Err(AppError::NotFound("메모".into()));
-        }
-        Ok(())
-    }
-
-    pub fn delete_note(connection: &Connection, note_id: i64) -> AppResult<()> {
-        let changed = connection.execute("DELETE FROM notes WHERE id = ?1", params![note_id])?;
-        if changed == 0 {
-            return Err(AppError::NotFound("메모".into()));
         }
         Ok(())
     }

@@ -126,6 +126,17 @@ impl NoteService {
         SqliteNoteRepository::update_title(connection, note_id, title.trim())
     }
 
+    pub fn update_color(connection: &Connection, input: UpdateNoteColorInput) -> AppResult<()> {
+        if !input.color.starts_with('#') {
+            return Err(AppError::Validation("색상은 HEX 형식이어야 합니다.".into()));
+        }
+        SqliteNoteRepository::update_color(connection, input.note_id, &input.color)
+    }
+
+    pub fn delete(connection: &Connection, note_id: i64) -> AppResult<()> {
+        SqliteNoteRepository::delete_note(connection, note_id)
+    }
+
     pub fn get_text(connection: &Connection, note_id: i64) -> AppResult<TextNote> {
         Self::require_type(connection, note_id, "text")?;
         let note = SqliteNoteRepository::find_note(connection, note_id)?
@@ -226,16 +237,5 @@ impl NoteService {
 
     pub fn delete_photo(connection: &Connection, photo_id: i64) -> AppResult<()> {
         SqliteNoteRepository::delete_photo(connection, photo_id)
-    }
-
-    pub fn update_color(connection: &Connection, input: UpdateNoteColorInput) -> AppResult<()> {
-        if !input.color.starts_with('#') {
-            return Err(AppError::Validation("색상은 HEX 형식이어야 합니다.".into()));
-        }
-        SqliteNoteRepository::update_color(connection, input.note_id, &input.color)
-    }
-
-    pub fn delete(connection: &Connection, note_id: i64) -> AppResult<()> {
-        SqliteNoteRepository::delete_note(connection, note_id)
     }
 }
