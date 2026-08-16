@@ -365,7 +365,7 @@ export default function StickyNote() {
                   </option>
                 ))}
               </select>
-              <div className="d-flex gap-1 mb-2">
+              <div className="d-flex gap-1 my-2">
                 {colors.map((color) => {
                   const selected = note.color === color;
 
