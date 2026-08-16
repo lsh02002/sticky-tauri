@@ -86,7 +86,8 @@ const QuillEditorInput = ({
         ? false
         : {
             container: [
-              ["bold", "italic", "underline", "strike"],
+              [{ size: ["small", false, "large", "huge"] }],
+              ["bold", "italic", "underline", "strike"],              
               [{ color: [] }, { background: [] }],
               [{ list: "ordered" }, { list: "bullet" }],
               ["blockquote", "link"],
