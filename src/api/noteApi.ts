@@ -9,6 +9,7 @@ import type {
   TodoNote,
   PhotoNote,
   FolderType,
+  PhotoItem,
 } from "../types/note";
 
 export const noteApi = {
@@ -24,7 +25,12 @@ export const noteApi = {
   renameFolder(folderId: number, newName: string) {
     return invoke<void>("rename_folder", { folderId, newName });
   },
-  createNote(noteType: NoteType, title: string, color?: string, folderId?: number) {
+  createNote(
+    noteType: NoteType,
+    title: string,
+    color?: string,
+    folderId?: number,
+  ) {
     return invoke<NoteSummary>("create_note", {
       input: { noteType, title, color, folderId },
     });
@@ -103,13 +109,36 @@ export const noteApi = {
     return invoke<void>("delete_note", { noteId });
   },
   addPhoto(noteId: number, filePath: string) {
-    return invoke<void>("add_photo", { input: { noteId, filePath } });
+    return invoke<PhotoItem>("add_photo", { input: { noteId, filePath } });
+  },
+  addRichTextWithPhotos: (
+    noteId: number,
+    content: string,
+    addedPhotos: {
+      tempId: string;
+      filePath: string;
+    }[],
+    deletedPhotoIds: number[],
+  ) => {
+    return invoke<{
+      content: string;
+    }>("add_rich_text_with_photos", {
+      input: {
+        noteId,
+        content,
+        addedPhotos,
+        deletedPhotoIds,
+      },
+    });
   },
   listPhotos(noteId: number) {
     return invoke<PhotoNote>("list_photos", { noteId });
   },
   deletePhoto(photoId: number) {
     return invoke<void>("delete_photo", { photoId });
+  },
+  deleteRichTextPhoto(photoId: number) {
+    return invoke<void>("delete_rich_text_photo", { photoId });
   },
   openManagerWindow() {
     return invoke<void>("open_manager_window");

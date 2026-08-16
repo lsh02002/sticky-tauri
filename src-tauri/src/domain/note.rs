@@ -76,3 +76,25 @@ pub struct SetDeletedNoteInput {
     pub note_id: i64,
     pub is_deleted: bool,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PendingRichTextPhotoInput {
+    pub temp_id: String,
+    pub file_path: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AddRichTextWithPhotosInput {
+    pub note_id: i64,
+    pub content: String,
+    pub added_photos: Vec<PendingRichTextPhotoInput>,
+    pub deleted_photo_ids: Vec<i64>,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RichTextContent {
+    pub content: String,
+}

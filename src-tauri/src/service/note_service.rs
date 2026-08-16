@@ -1,4 +1,4 @@
-use crate::domain::{CreateFolderRequest, Folder};
+use crate::domain::{AddRichTextWithPhotosInput, CreateFolderRequest, Folder, RichTextContent};
 use crate::repository::SqliteNoteRepository;
 use rusqlite::Connection;
 
@@ -245,6 +245,67 @@ impl NoteService {
         SqliteNoteRepository::add_photo(connection, input.note_id, input.file_path.trim())
     }
 
+    pub fn add_rich_text_with_photos(
+    connection: &mut Connection,
+    input: AddRichTextWithPhotosInput,
+    ) -> AppResult<RichTextContent> {
+        Self::require_type(
+            connection,
+            input.note_id,
+            "richText",
+        )?;
+
+        let mut content = input.content;
+
+        // 1. 새 사진 추가
+        for added_photo in input.added_photos {
+            let file_path = added_photo.file_path.trim();
+
+            if file_path.is_empty() {
+                return Err(AppError::Validation(
+                    "파일 경로를 입력해주세요.".into(),
+                ));
+            }
+
+            let photo =
+                SqliteNoteRepository::add_photo(
+                    connection,
+                    input.note_id,
+                    file_path,
+                )?;
+
+            content = content.replace(
+                &format!(
+                    "#tempPhotoId={}",
+                    added_photo.temp_id,
+                ),
+                &format!(
+                    "#photoId={}",
+                    photo.id,
+                ),
+            );
+        }
+
+        // 2. 삭제된 사진 제거
+        for photo_id in input.deleted_photo_ids {
+            SqliteNoteRepository::delete_photo(
+                connection,
+                photo_id,
+            )?;
+        }
+
+        // 3. RichText 저장
+            SqliteNoteRepository::update_rich_text(
+                connection,
+                input.note_id,
+                &content,
+            )?;
+
+        Ok(RichTextContent {
+            content,
+        })
+    }
+
     pub fn list_photos(connection: &Connection, note_id: i64) -> AppResult<PhotoNote> {
         Self::require_type(connection, note_id, "photo")?;
         let note = SqliteNoteRepository::find_note(connection, note_id)?
@@ -254,6 +315,10 @@ impl NoteService {
     }
 
     pub fn delete_photo(connection: &Connection, photo_id: i64) -> AppResult<()> {
+        SqliteNoteRepository::delete_photo(connection, photo_id)
+    }
+
+    pub fn delete_rich_text_photo(connection: &Connection, photo_id: i64) -> AppResult<()> {
         SqliteNoteRepository::delete_photo(connection, photo_id)
     }
 }

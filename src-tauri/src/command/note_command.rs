@@ -1,13 +1,9 @@
 use tauri::State;
 
 use crate::{
-    domain::{
-        AddExpenseInput, AddPhotoInput, AddTodoInput, CreateFolderRequest, CreateNoteInput,
-        ExpenseItem, ExpenseNote, Folder, NoteSummary, PhotoItem, PhotoNote, SetDeletedNoteInput,
-        TextNote, TodoItem, TodoNote, ToggleTodoInput, UpdateNoteColorInput, UpdateTextNoteInput,
-    },
-    service::NoteService,
-    AppState,
+    AppState, domain::{
+        AddExpenseInput, AddPhotoInput, AddRichTextWithPhotosInput, AddTodoInput, CreateFolderRequest, CreateNoteInput, ExpenseItem, ExpenseNote, Folder, NoteSummary, PhotoItem, PhotoNote, RichTextContent, SetDeletedNoteInput, TextNote, TodoItem, TodoNote, ToggleTodoInput, UpdateNoteColorInput, UpdateTextNoteInput,
+    }, service::NoteService,
 };
 
 #[tauri::command]
@@ -230,6 +226,15 @@ pub async fn add_photo(
 }
 
 #[tauri::command]
+pub async fn add_rich_text_with_photos(
+    state: State<'_, AppState>,
+    input: AddRichTextWithPhotosInput,
+) -> Result<RichTextContent, String> {
+    let mut db = state.connection()?;
+    NoteService::add_rich_text_with_photos(&mut db, input).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn list_photos(state: State<'_, AppState>, note_id: i64) -> Result<PhotoNote, String> {
     let db = state.connection()?;
     NoteService::list_photos(&db, note_id).map_err(|e| e.to_string())
@@ -239,4 +244,13 @@ pub async fn list_photos(state: State<'_, AppState>, note_id: i64) -> Result<Pho
 pub async fn delete_photo(state: State<'_, AppState>, photo_id: i64) -> Result<(), String> {
     let db = state.connection()?;
     NoteService::delete_photo(&db, photo_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn delete_rich_text_photo(
+    state: State<'_, AppState>,
+    photo_id: i64,
+) -> Result<(), String> {
+    let db = state.connection()?;
+    NoteService::delete_rich_text_photo(&db, photo_id).map_err(|e| e.to_string())
 }

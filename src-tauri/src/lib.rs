@@ -224,10 +224,12 @@ pub fn run() {
             command::delete_todo_item,
             command::get_expense_note,
             command::add_expense_item,
-            command::delete_expense_item,            
+            command::delete_expense_item,
             command::add_photo,
+            command::add_rich_text_with_photos,
             command::list_photos,
             command::delete_photo,
+            command::delete_rich_text_photo,
             command::open_manager_window,
             command::open_note_window,
         ])
