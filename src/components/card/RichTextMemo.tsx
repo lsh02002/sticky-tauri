@@ -90,9 +90,6 @@ export function RichTextMemo({
     <div className="p-3">
       <QuillEditorInput
         ref={editorRef}
-        name="richmemo"
-        title=""
-        noteId={noteId}
         data={content}
         setData={setContent}
         showToolbar={showToolbar}

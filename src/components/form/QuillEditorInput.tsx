@@ -31,13 +31,8 @@ export type QuillEditorInputRef = {
 
 type QuillEditorInputProps = {
   disabled?: boolean;
-  name: string;
-  title: string;
   data: string;
   setData: (v: string) => void;
-
-  noteId: number;
-
   rows?: number;
   showToolbar?: boolean;
 };
@@ -92,11 +87,8 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
   (
     {
       disabled,
-      name,
-      title,
       data,
       setData,
-      noteId,
       rows = 6,
       showToolbar = true,
     },
@@ -214,7 +206,7 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
       savedPhotoIdsRef.current = getPhotoIdsFromHtml(data);
 
       tempPhotoFilesRef.current.clear();
-    }, [noteId]);
+    }, []);
 
     useEffect(() => {
       const editor = quillRef.current?.getEditor();
@@ -446,7 +438,7 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
         resizeObserver.disconnect();
         root.classList.remove("image-caret-active");
       };
-    }, [disabled, noteId, showToolbar]);
+    }, [disabled, showToolbar]);
 
     const modules = useMemo(
       () => ({
@@ -578,16 +570,12 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
               },
             },
       }),
-      [disabled, noteId],
+      [disabled],
     );
 
     return (
       <div className="w-100 mb-3">
         <style>{quillStyles}</style>
-
-        <label htmlFor={name} className="form-label fw-semibold">
-          {title}
-        </label>
 
         <div
           ref={editorWrapRef}
