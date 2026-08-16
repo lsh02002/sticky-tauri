@@ -215,7 +215,9 @@ export default function MainManager() {
             ? "새 투두리스트"
             : noteType === "expense"
               ? "새 가계부"
-              : "새 사진 메모";
+              : noteType === "richText"
+                ? "새 리치 텍스트 메모"
+                : "새 사진 메모";
 
       const note = await noteApi.createNote(
         noteType,
