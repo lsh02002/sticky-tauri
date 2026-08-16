@@ -21,6 +21,33 @@ export default function MainManager() {
   const selectedFolderIdRef = useRef(selectedFolderId);
   const searchQueryRef = useRef(searchQuery);
 
+  const createButtons = [
+    {
+      type: "text",
+      label: "텍스트",
+      className: "btn-warning",
+      icon: "bi-file-text",
+    },
+    {
+      type: "todo",
+      label: "투두",
+      className: "btn-success",
+      icon: "bi-check2-square",
+    },
+    {
+      type: "expense",
+      label: "가계부",
+      className: "btn-info",
+      icon: "bi-wallet2",
+    },
+    {
+      type: "photo",
+      label: "사진",
+      className: "btn-secondary",
+      icon: "bi-image",
+    },
+  ] as const;
+
   useEffect(() => {
     selectedFolderIdRef.current = selectedFolderId;
   }, [selectedFolderId]);
@@ -275,7 +302,7 @@ export default function MainManager() {
                         );
 
                         await emit("folders-updated");
-                        
+
                         setEditingFolderId(null);
                         void fetchFolders();
                       }
@@ -358,61 +385,22 @@ export default function MainManager() {
               Sticky Tauri
             </span>
             <div className="d-flex gap-2">
-              <button
-                type="button"
-                className="btn btn-warning btn-sm"
-                disabled={creating !== null}
-                onClick={() => void create("text")}
-              >
-                {creating === "text" ? (
-                  <span className="spinner-border spinner-border-sm me-1" />
-                ) : (
-                  <i className="bi bi-file-text me-1" />
-                )}
-                텍스트
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-success btn-sm"
-                disabled={creating !== null}
-                onClick={() => void create("todo")}
-              >
-                {creating === "todo" ? (
-                  <span className="spinner-border spinner-border-sm me-1" />
-                ) : (
-                  <i className="bi bi-check2-square me-1" />
-                )}
-                투두
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-info btn-sm"
-                disabled={creating !== null}
-                onClick={() => void create("expense")}
-              >
-                {creating === "expense" ? (
-                  <span className="spinner-border spinner-border-sm me-1" />
-                ) : (
-                  <i className="bi bi-wallet2 me-1" />
-                )}
-                가계부
-              </button>
-
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                disabled={creating !== null}
-                onClick={() => void create("photo")}
-              >
-                {creating === "photo" ? (
-                  <span className="spinner-border spinner-border-sm me-1" />
-                ) : (
-                  <i className="bi bi-image me-1" />
-                )}
-                사진
-              </button>
+              {createButtons.map(({ type, label, className, icon }) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={`btn ${className} btn-sm`}
+                  disabled={creating !== null}
+                  onClick={() => void create(type)}
+                >
+                  {creating === type ? (
+                    <span className="spinner-border spinner-border-sm me-1" />
+                  ) : (
+                    <i className={`bi ${icon} me-1`} />
+                  )}
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
           <input
