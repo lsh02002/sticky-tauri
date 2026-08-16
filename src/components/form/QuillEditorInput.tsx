@@ -517,6 +517,8 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
                   },
                 ],
 
+                [{ align: false }, { align: "center" }, { align: "right" }],
+
                 ["blockquote", "link", "image"],
 
                 ["clean"],
