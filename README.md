@@ -5,6 +5,7 @@ Tauri 2 + Rust + SQLite + React + Bootstrap로 만든 모듈형 스티키 메모
 ## 기능
 
 - 텍스트 메모
+- 리치텍스트 메모
 - 투두리스트 메모
 - 가계부 메모
 - 사진 메모
