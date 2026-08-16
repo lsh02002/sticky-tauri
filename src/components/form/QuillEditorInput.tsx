@@ -84,16 +84,7 @@ const getPhotoIdsFromHtml = (html: string): Set<number> => {
 };
 
 const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
-  (
-    {
-      disabled,
-      data,
-      setData,
-      rows = 6,
-      showToolbar = true,
-    },
-    ref,
-  ) => {
+  ({ disabled, data, setData, rows = 6, showToolbar = true }, ref) => {
     const quillRef = useRef<ReactQuill | null>(null);
 
     const editorWrapRef = useRef<HTMLDivElement | null>(null);
@@ -380,32 +371,85 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
         scheduleImageCaretUpdate();
       };
 
+      let beforeContextMenuRange: {
+        index: number;
+        length: number;
+      } | null = null;
+
       const handleImageMouseDown = (event: MouseEvent) => {
         const target = event.target;
 
         if (!(target instanceof HTMLImageElement)) return;
         if (!root.contains(target)) return;
 
+        if (event.button === 2) {
+          const range = editor.getSelection();
+
+          // 실제 선택 영역이 있을 때만 저장
+          beforeContextMenuRange =
+            range && range.length > 0
+              ? {
+                  index: range.index,
+                  length: range.length,
+                }
+              : null;
+
+          // 이미지 우클릭으로 브라우저가 selection을 새로 만드는 것을 방지
+          event.preventDefault();
+
+          return;
+        }
+
+        // 좌클릭만 이미지 caret 처리
+        if (event.button !== 0) return;
+
         const imageIndex = getImageIndex(target);
         if (imageIndex === null) return;
 
         const rect = target.getBoundingClientRect();
+
         const side =
           event.clientX < rect.left + rect.width / 2 ? "left" : "right";
+
         const nextIndex = side === "left" ? imageIndex : imageIndex + 1;
 
-        // 이미지 자체가 선택되는 대신 클릭한 쪽에 텍스트 커서를 둔다.
         event.preventDefault();
+
         editor.focus();
         editor.setSelection(nextIndex, 0, "user");
-        scheduleImageCaretUpdate({ index: nextIndex, length: 0 });
+
+        scheduleImageCaretUpdate({
+          index: nextIndex,
+          length: 0,
+        });
+      };
+
+      const handleImageContextMenu = (event: MouseEvent) => {
+        const target = event.target;
+
+        if (!(target instanceof HTMLImageElement)) return;
+        if (!root.contains(target)) return;
+
+        // contextmenu에는 preventDefault 하지 않음
+        // → 우클릭 메뉴는 정상적으로 표시
+
+        if (beforeContextMenuRange) {
+          const savedRange = beforeContextMenuRange;
+
+          requestAnimationFrame(() => {
+            editor.setSelection(savedRange.index, savedRange.length, "silent");
+
+            beforeContextMenuRange = null;
+          });
+        }
       };
 
       editor.on("selection-change", handleSelectionChange);
       editor.on("text-change", handleTextChange);
-      root.addEventListener("mousedown", handleImageMouseDown);
       root.addEventListener("scroll", handleLayoutChange);
       root.addEventListener("load", handleLayoutChange, true);
+      root.addEventListener("mousedown", handleImageMouseDown);
+      root.addEventListener("contextmenu", handleImageContextMenu);
       window.addEventListener("resize", handleLayoutChange);
       window.addEventListener("scroll", handleLayoutChange, true);
 
@@ -430,9 +474,10 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
         cancelAnimationFrame(rafId);
         editor.off("selection-change", handleSelectionChange);
         editor.off("text-change", handleTextChange);
-        root.removeEventListener("mousedown", handleImageMouseDown);
         root.removeEventListener("scroll", handleLayoutChange);
         root.removeEventListener("load", handleLayoutChange, true);
+        root.removeEventListener("mousedown", handleImageMouseDown);
+        root.removeEventListener("contextmenu", handleImageContextMenu);
         window.removeEventListener("resize", handleLayoutChange);
         window.removeEventListener("scroll", handleLayoutChange, true);
         resizeObserver.disconnect();
