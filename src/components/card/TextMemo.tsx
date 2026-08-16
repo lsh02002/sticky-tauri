@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
-import type { NoteSummary } from "../../types/note";
 
 export function TextMemo({
   noteId,

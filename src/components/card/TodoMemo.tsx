@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
-import type { TodoItem, NoteSummary } from "../../types/note";
+import type { TodoItem } from "../../types/note";
 import { confirm } from "@tauri-apps/plugin-dialog";
 
 export function TodoMemo({ noteId }: { noteId: number }) {

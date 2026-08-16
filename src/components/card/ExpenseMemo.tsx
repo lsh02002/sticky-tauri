@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { noteApi } from "../../api/noteApi";
-import type { ExpenseNote, NoteSummary } from "../../types/note";
+import type { ExpenseNote } from "../../types/note";
 import { confirm } from "@tauri-apps/plugin-dialog";
 
 export function ExpenseMemo({ noteId }: { noteId: number }) {

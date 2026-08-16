@@ -3,7 +3,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { confirm, open } from "@tauri-apps/plugin-dialog";
 
 import { noteApi } from "../../api/noteApi";
-import type { NoteSummary, PhotoItem, PhotoNote } from "../../types/note";
+import type { PhotoItem, PhotoNote } from "../../types/note";
 
 export function PhotoMemo({ noteId }: { noteId: number }) {
   const [items, setItems] = useState<PhotoItem[]>([]);
