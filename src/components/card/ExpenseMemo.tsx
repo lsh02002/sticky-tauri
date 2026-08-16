@@ -10,32 +10,50 @@ export function ExpenseMemo({ noteId }: { noteId: number }) {
   const [kind, setKind] = useState<"수입" | "지출">("지출");
   const [category, setCategory] = useState("식비");
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [error, setError] = useState("");
 
   async function reload() {
-    setData(await noteApi.getExpense(noteId));
+    try {
+      setError("");
+      setData(await noteApi.getExpense(noteId));
+    } catch (e) {
+      setError(String(e));
+    }
   }
+
   useEffect(() => {
     void reload();
   }, [noteId]);
 
   async function add() {
-    const parsed = Number(amount);
-    if (!description.trim() || !Number.isInteger(parsed) || parsed <= 0) return;
-    await noteApi.addExpense({
-      noteId: noteId,
-      description,
-      amount: parsed,
-      kind,
-      category,
-      expenseDate: date,
-    });
-    setDescription("");
-    setAmount("");
-    await reload();
+    try {
+      setError("");
+      const parsed = Number(amount);
+      if (!description.trim() || !Number.isInteger(parsed) || parsed <= 0)
+        return;
+      await noteApi.addExpense({
+        noteId: noteId,
+        description,
+        amount: parsed,
+        kind,
+        category,
+        expenseDate: date,
+      });
+      setDescription("");
+      setAmount("");
+      await reload();
+    } catch (e) {
+      setError(String(e));
+    }
   }
 
   return (
     <div className="p-3">
+      {error && (
+        <div className="alert alert-danger py-2" role="alert">
+          {error}
+        </div>
+      )}
       <div className="w-100 row mb-2">
         <div className="col-7">
           <input

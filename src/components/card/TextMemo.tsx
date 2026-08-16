@@ -10,23 +10,41 @@ export function TextMemo({
 }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    noteApi.getText(noteId).then((value) => {      
-      setContent(value.content);
-      setLoading(false);
-    });
+    setError("");
+    noteApi
+      .getText(noteId)
+      .then((value) => {
+        setContent(value.content);
+        setLoading(false);
+      })
+      .catch((e) => {
+        setError(String(e));
+        setLoading(false);
+      });
   }, [noteId]);
 
   async function save() {
-    await noteApi.updateText(noteId, content);
-    onChanged();
+    try {
+      setError("");
+      await noteApi.updateText(noteId, content);
+      onChanged();
+    } catch (e) {
+      setError(String(e));
+    }
   }
 
   if (loading) return <div className="text-muted">불러오는 중...</div>;
 
   return (
     <>
+      {error && (
+        <div className="alert alert-danger py-2" role="alert">
+          {error}
+        </div>
+      )}
       <textarea
         className="form-control memo-textarea"
         value={content}

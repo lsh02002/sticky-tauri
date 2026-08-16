@@ -15,6 +15,7 @@ export function RichTextMemo({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const [showToolbar, setShowToolbar] = useState(false);
 
@@ -25,6 +26,7 @@ export function RichTextMemo({
 
     setLoading(true);
 
+    setError("");
     noteApi
       .getRichText(noteId)
       .then((value) => {
@@ -36,6 +38,7 @@ export function RichTextMemo({
         if (cancelled) return;
 
         console.error("리치텍스트 불러오기 실패:", error);
+        setError(String(error));
       })
       .finally(() => {
         if (cancelled) return;
@@ -61,6 +64,8 @@ export function RichTextMemo({
     try {
       setSaving(true);
 
+      setError("");
+
       const result = await noteApi.addRichTextWithPhotos(
         noteId,
         payload.content,
@@ -77,6 +82,7 @@ export function RichTextMemo({
       onChanged();
     } catch (error) {
       console.error("리치텍스트 저장 실패:", error);
+      setError(String(error));
     } finally {
       setSaving(false);
     }
@@ -88,6 +94,12 @@ export function RichTextMemo({
 
   return (
     <div className="p-3">
+      {error && (
+        <div className="alert alert-danger py-2" role="alert">
+          {error}
+        </div>
+      )}
+
       <QuillEditorInput
         ref={editorRef}
         data={content}
