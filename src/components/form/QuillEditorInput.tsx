@@ -170,7 +170,7 @@ const QuillEditorInput = ({
             setIsEmpty(editor.getText().trim().length === 0);
           }}
           readOnly={disabled}
-          placeholder={isEmpty ? `${title}을(를) 입력하세요` : ""}
+          placeholder={isEmpty ? `내용을(를) 입력하세요` : ""}
           modules={modules}
         />
       </div>
