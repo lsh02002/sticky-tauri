@@ -278,6 +278,10 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
 
       if (!editor || !root || !wrap) return;
 
+      // 이 effect 안에서 다시 조회해야 스코프 문제 없이 사용할 수 있다.
+      // showToolbar가 false일 때는 null이며 ResizeObserver 대상에서 제외된다.
+      const toolbarContainer = wrap.querySelector<HTMLElement>(".ql-toolbar");
+
       let rafId = 0;
 
       const hideImageCaret = () => {
@@ -413,7 +417,22 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
       window.addEventListener("resize", handleLayoutChange);
       window.addEventListener("scroll", handleLayoutChange, true);
 
+      // 툴바 표시/숨김, 툴바 줄바꿈, 에디터 크기 변화가 생기면
+      // 이미지와 custom caret의 상대 위치를 즉시 다시 계산한다.
+      const resizeObserver = new ResizeObserver(() => {
+        scheduleImageCaretUpdate();
+      });
+
+      resizeObserver.observe(wrap);
+      resizeObserver.observe(root);
+
+      if (toolbarContainer) {
+        resizeObserver.observe(toolbarContainer);
+      }
+
+      // showToolbar가 바뀐 직후 브라우저 레이아웃 반영 이후 한 번 더 계산한다.
       scheduleImageCaretUpdate();
+      requestAnimationFrame(() => scheduleImageCaretUpdate());
 
       return () => {
         cancelAnimationFrame(rafId);
@@ -424,9 +443,10 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
         root.removeEventListener("load", handleLayoutChange, true);
         window.removeEventListener("resize", handleLayoutChange);
         window.removeEventListener("scroll", handleLayoutChange, true);
+        resizeObserver.disconnect();
         root.classList.remove("image-caret-active");
       };
-    }, [disabled, noteId]);
+    }, [disabled, noteId, showToolbar]);
 
     const modules = useMemo(
       () => ({
