@@ -29,6 +29,12 @@ export default function MainManager() {
       icon: "bi-file-text",
     },
     {
+      type: "richText",
+      label: "리치 텍스트",
+      className: "btn-primary",
+      icon: "bi-type",
+    },
+    {
       type: "todo",
       label: "투두",
       className: "btn-success",

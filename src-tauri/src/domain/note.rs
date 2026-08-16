@@ -1,9 +1,10 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 pub enum NoteType {
     Text,
+    RichText,
     Todo,
     Expense,
     Photo,
@@ -13,6 +14,7 @@ impl NoteType {
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Text => "text",
+            Self::RichText => "richText",
             Self::Todo => "todo",
             Self::Expense => "expense",
             Self::Photo => "photo",

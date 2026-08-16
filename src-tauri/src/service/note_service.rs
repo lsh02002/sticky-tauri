@@ -63,6 +63,8 @@ impl NoteService {
         )?;
         if note_type == "text" {
             SqliteNoteRepository::create_text_detail(connection, id)?;
+        } else if note_type == "richText" {
+            SqliteNoteRepository::create_rich_text_detail(connection, id)?;
         }
         SqliteNoteRepository::find_note(connection, id)?
             .ok_or_else(|| AppError::NotFound("생성된 메모".into()))
@@ -148,6 +150,22 @@ impl NoteService {
     pub fn update_text(connection: &mut Connection, input: UpdateTextNoteInput) -> AppResult<()> {
         Self::require_type(connection, input.note_id, "text")?;
         SqliteNoteRepository::update_text(connection, input.note_id, &input.content)
+    }
+
+    pub fn get_rich_text(connection: &Connection, note_id: i64) -> AppResult<TextNote> {
+        Self::require_type(connection, note_id, "richText")?;
+        let note = SqliteNoteRepository::find_note(connection, note_id)?
+            .ok_or_else(|| AppError::NotFound("메모".into()))?;
+        let content = SqliteNoteRepository::get_rich_text_content(connection, note_id)?;
+        Ok(TextNote { note, content })
+    }
+
+    pub fn update_rich_text(
+        connection: &mut Connection,
+        input: UpdateTextNoteInput,
+    ) -> AppResult<()> {
+        Self::require_type(connection, input.note_id, "richText")?;
+        SqliteNoteRepository::update_rich_text(connection, input.note_id, &input.content)
     }
 
     pub fn get_todo(connection: &Connection, note_id: i64) -> AppResult<TodoNote> {

@@ -6,6 +6,7 @@ import { emit } from "@tauri-apps/api/event";
 
 const typeLabel = {
   text: "텍스트",
+  richText: "리치 텍스트",
   todo: "투두",
   expense: "가계부",
   photo: "사진",
@@ -13,6 +14,7 @@ const typeLabel = {
 
 const typeIcon = {
   text: "bi-file-text",
+  richText: "bi-type",
   todo: "bi-check2-square",
   expense: "bi-wallet2",
   photo: "bi-image",

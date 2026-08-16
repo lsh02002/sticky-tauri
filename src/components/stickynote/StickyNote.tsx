@@ -9,6 +9,7 @@ import { TodoMemo } from "../../components/card/TodoMemo";
 import { ExpenseMemo } from "../../components/card/ExpenseMemo";
 import type { NoteSummary, SelectOption } from "../../types/note";
 import { PhotoMemo } from "../card/PhotoMemo";
+import { RichTextMemo } from "../card/RichTextMemo";
 
 const colors = ["#fff59d", "#ffccbc", "#c8e6c9", "#bbdefb", "#e1bee7"];
 
@@ -435,13 +436,19 @@ export default function StickyNote() {
             <TextMemo noteId={note.id} onChanged={() => void reload()} />
           )}
 
+          {note.noteType === "richText" && (
+            <RichTextMemo noteId={note.id} onChanged={() => void reload()} />
+          )}
+
           {note.noteType === "todo" && <TodoMemo noteId={note.id} />}
 
           {note.noteType === "expense" && <ExpenseMemo noteId={note.id} />}
 
           {note.noteType === "photo" && <PhotoMemo noteId={note.id} />}
 
-          {!["text", "todo", "expense", "photo"].includes(note.noteType) && (
+          {!["text", "richText", "todo", "expense", "photo"].includes(
+            note.noteType,
+          ) && (
             <div className="alert alert-danger">
               지원하지 않는 메모 타입입니다: {note.noteType}
             </div>

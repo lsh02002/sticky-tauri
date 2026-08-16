@@ -216,6 +216,8 @@ pub fn run() {
             command::search_notes,
             command::get_text_note,
             command::update_text_note,
+            command::get_rich_text_note,
+            command::update_rich_text_note,
             command::get_todo_note,
             command::add_todo_item,
             command::toggle_todo_item,

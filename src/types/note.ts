@@ -1,4 +1,4 @@
-export type NoteType = "text" | "todo" | "expense" | "photo";
+export type NoteType = "text" | "richText" | "todo" | "expense" | "photo";
 
 export interface NoteSummary {
   id: number;

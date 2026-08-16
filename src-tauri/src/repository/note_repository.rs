@@ -23,7 +23,7 @@ impl SqliteNoteRepository {
 
             CREATE TABLE IF NOT EXISTS notes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                note_type TEXT NOT NULL CHECK(note_type IN ('text', 'todo', 'expense', 'photo')),
+                note_type TEXT NOT NULL CHECK(note_type IN ('text', 'richText', 'todo', 'expense', 'photo')),
                 title TEXT NOT NULL DEFAULT '',
                 color TEXT NOT NULL DEFAULT '#fff59d',
                 x REAL NOT NULL DEFAULT 40,
@@ -39,6 +39,12 @@ impl SqliteNoteRepository {
             );
 
             CREATE TABLE IF NOT EXISTS text_notes (
+                note_id INTEGER PRIMARY KEY,
+                content TEXT NOT NULL DEFAULT '',
+                FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE
+            );
+
+            CREATE TABLE IF NOT EXISTS rich_text_notes (
                 note_id INTEGER PRIMARY KEY,
                 content TEXT NOT NULL DEFAULT '',
                 FOREIGN KEY(note_id) REFERENCES notes(id) ON DELETE CASCADE
@@ -188,6 +194,14 @@ impl SqliteNoteRepository {
     pub fn create_text_detail(connection: &Connection, note_id: i64) -> AppResult<()> {
         connection.execute(
             "INSERT INTO text_notes (note_id, content) VALUES (?1, '')",
+            params![note_id],
+        )?;
+        Ok(())
+    }
+
+    pub fn create_rich_text_detail(connection: &Connection, note_id: i64) -> AppResult<()> {
+        connection.execute(
+            "INSERT INTO rich_text_notes (note_id, content) VALUES (?1, '')",
             params![note_id],
         )?;
         Ok(())
@@ -369,6 +383,43 @@ impl SqliteNoteRepository {
 
         let changed = tx.execute(
             "UPDATE text_notes
+            SET content = ?1
+            WHERE note_id = ?2
+            AND content != ?1",
+            params![content, note_id],
+        )?;
+
+        if changed > 0 {
+            tx.execute(
+                "UPDATE notes
+                SET updated_at = datetime('now', '+9 hours')
+                WHERE id = ?1",
+                params![note_id],
+            )?;
+        }
+
+        tx.commit()?;
+
+        Ok(())
+    }
+
+    pub fn get_rich_text_content(connection: &Connection, note_id: i64) -> AppResult<String> {
+        Ok(connection.query_row(
+            "SELECT content FROM rich_text_notes WHERE note_id = ?1",
+            params![note_id],
+            |row| row.get(0),
+        )?)
+    }
+
+    pub fn update_rich_text(
+        connection: &mut Connection,
+        note_id: i64,
+        content: &str,
+    ) -> AppResult<()> {
+        let tx = connection.transaction()?;
+
+        let changed = tx.execute(
+            "UPDATE rich_text_notes
             SET content = ?1
             WHERE note_id = ?2
             AND content != ?1",

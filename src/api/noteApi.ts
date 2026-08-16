@@ -57,6 +57,14 @@ export const noteApi = {
       input: { noteId, content },
     });
   },
+  getRichText(noteId: number) {
+    return invoke<TextNote>("get_rich_text_note", { noteId });
+  },
+  updateRichText(noteId: number, content: string) {
+    return invoke<void>("update_rich_text_note", {
+      input: { noteId, content },
+    });
+  },
   updateTitle(noteId: number, title: string) {
     return invoke<boolean>("update_note_title", { noteId, title });
   },

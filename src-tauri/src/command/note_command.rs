@@ -149,6 +149,24 @@ pub async fn update_text_note(
 }
 
 #[tauri::command]
+pub async fn get_rich_text_note(
+    state: State<'_, AppState>,
+    note_id: i64,
+) -> Result<TextNote, String> {
+    let db = state.connection()?;
+    NoteService::get_rich_text(&db, note_id).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub async fn update_rich_text_note(
+    state: State<'_, AppState>,
+    input: UpdateTextNoteInput,
+) -> Result<(), String> {
+    let mut db = state.connection()?;
+    NoteService::update_rich_text(&mut *db, input).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn get_todo_note(state: State<'_, AppState>, note_id: i64) -> Result<TodoNote, String> {
     let db = state.connection()?;
     NoteService::get_todo(&db, note_id).map_err(|e| e.to_string())
