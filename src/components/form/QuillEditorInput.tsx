@@ -104,6 +104,8 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
   ) => {
     const quillRef = useRef<ReactQuill | null>(null);
 
+    const editorWrapRef = useRef<HTMLDivElement | null>(null);
+
     const savedRangeRef = useRef<{
       index: number;
       length: number;
@@ -114,6 +116,13 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
     const tempPhotoFilesRef = useRef<Map<string, string>>(new Map());
 
     const [isEmpty, setIsEmpty] = useState(true);
+
+    const [imageCaret, setImageCaret] = useState({
+      visible: false,
+      left: 0,
+      top: 0,
+      height: 0,
+    });
 
     const getCurrentPhotos = () => {
       const editor = quillRef.current?.getEditor();
@@ -262,6 +271,163 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
       };
     }, []);
 
+    useEffect(() => {
+      const editor = quillRef.current?.getEditor();
+      const root = editor?.root;
+      const wrap = editorWrapRef.current;
+
+      if (!editor || !root || !wrap) return;
+
+      let rafId = 0;
+
+      const hideImageCaret = () => {
+        root.classList.remove("image-caret-active");
+        setImageCaret((current) =>
+          current.visible ? { ...current, visible: false } : current,
+        );
+      };
+
+      const getImageIndex = (image: HTMLImageElement): number | null => {
+        try {
+          // getLeaf(index)로 경계를 추측하지 않고,
+          // 실제 img DOM -> Quill blot -> 문서 index 순서로 찾는다.
+          const Quill = (ReactQuill as any).Quill;
+          const blot = Quill?.find?.(image);
+
+          if (!blot) return null;
+
+          const index = editor.getIndex(blot);
+          return Number.isFinite(index) ? index : null;
+        } catch {
+          return null;
+        }
+      };
+
+      const findAdjacentImage = (caretIndex: number) => {
+        const images = Array.from(
+          root.querySelectorAll<HTMLImageElement>("img"),
+        );
+
+        for (const image of images) {
+          const imageIndex = getImageIndex(image);
+
+          if (imageIndex === null) continue;
+
+          if (caretIndex === imageIndex) {
+            return { image, side: "left" as const };
+          }
+
+          if (caretIndex === imageIndex + 1) {
+            return { image, side: "right" as const };
+          }
+        }
+
+        return null;
+      };
+
+      const updateImageCaretNow = (range = editor.getSelection()) => {
+        if (!range || range.length !== 0 || disabled) {
+          hideImageCaret();
+          return;
+        }
+
+        const target = findAdjacentImage(range.index);
+
+        if (!target) {
+          hideImageCaret();
+          return;
+        }
+
+        const imageRect = target.image.getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+
+        // 아직 이미지가 로딩되지 않아 높이가 0이면 잠시 숨긴다.
+        if (imageRect.height <= 0) {
+          hideImageCaret();
+          return;
+        }
+
+        root.classList.add("image-caret-active");
+
+        setImageCaret({
+          visible: true,
+          left:
+            (target.side === "right" ? imageRect.right : imageRect.left) -
+            wrapRect.left,
+          top: imageRect.top - wrapRect.top,
+          height: imageRect.height,
+        });
+      };
+
+      const scheduleImageCaretUpdate = (
+        range?: { index: number; length: number } | null,
+      ) => {
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          updateImageCaretNow(
+            range === undefined ? editor.getSelection() : range,
+          );
+        });
+      };
+
+      const handleSelectionChange = (
+        range: { index: number; length: number } | null,
+      ) => {
+        scheduleImageCaretUpdate(range);
+      };
+
+      const handleTextChange = () => {
+        scheduleImageCaretUpdate();
+      };
+
+      const handleLayoutChange = () => {
+        scheduleImageCaretUpdate();
+      };
+
+      const handleImageMouseDown = (event: MouseEvent) => {
+        const target = event.target;
+
+        if (!(target instanceof HTMLImageElement)) return;
+        if (!root.contains(target)) return;
+
+        const imageIndex = getImageIndex(target);
+        if (imageIndex === null) return;
+
+        const rect = target.getBoundingClientRect();
+        const side =
+          event.clientX < rect.left + rect.width / 2 ? "left" : "right";
+        const nextIndex = side === "left" ? imageIndex : imageIndex + 1;
+
+        // 이미지 자체가 선택되는 대신 클릭한 쪽에 텍스트 커서를 둔다.
+        event.preventDefault();
+        editor.focus();
+        editor.setSelection(nextIndex, 0, "user");
+        scheduleImageCaretUpdate({ index: nextIndex, length: 0 });
+      };
+
+      editor.on("selection-change", handleSelectionChange);
+      editor.on("text-change", handleTextChange);
+      root.addEventListener("mousedown", handleImageMouseDown);
+      root.addEventListener("scroll", handleLayoutChange);
+      root.addEventListener("load", handleLayoutChange, true);
+      window.addEventListener("resize", handleLayoutChange);
+      window.addEventListener("scroll", handleLayoutChange, true);
+
+      scheduleImageCaretUpdate();
+
+      return () => {
+        cancelAnimationFrame(rafId);
+        editor.off("selection-change", handleSelectionChange);
+        editor.off("text-change", handleTextChange);
+        root.removeEventListener("mousedown", handleImageMouseDown);
+        root.removeEventListener("scroll", handleLayoutChange);
+        root.removeEventListener("load", handleLayoutChange, true);
+        window.removeEventListener("resize", handleLayoutChange);
+        window.removeEventListener("scroll", handleLayoutChange, true);
+        root.classList.remove("image-caret-active");
+      };
+    }, [disabled, noteId]);
+
     const modules = useMemo(
       () => ({
         toolbar: disabled
@@ -384,7 +550,7 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
 
                     editor.insertEmbed(index, "image", tempImageUrl, "user");
 
-                    editor.setSelection(index + 1, 0, "silent");
+                    editor.setSelection(index + 1, 0, "user");
                   } catch (error) {
                     console.error("사진 선택 실패:", error);
                   }
@@ -404,6 +570,7 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
         </label>
 
         <div
+          ref={editorWrapRef}
           className={`w-100 quill-editor-bootstrap ${
             disabled ? "is-disabled" : ""
           } ${!showToolbar ? "toolbar-hidden" : ""}`}
@@ -419,6 +586,17 @@ const QuillEditorInput = forwardRef<QuillEditorInputRef, QuillEditorInputProps>(
             } as React.CSSProperties
           }
         >
+          {imageCaret.visible && (
+            <div
+              className="quill-image-caret"
+              style={{
+                left: `${imageCaret.left}px`,
+                top: `${imageCaret.top}px`,
+                height: `${imageCaret.height}px`,
+              }}
+            />
+          )}
+
           <ReactQuill
             ref={quillRef}
             theme="snow"
@@ -446,6 +624,24 @@ const quillStyles = `
 .quill-editor-bootstrap {
   width: 100%;
   min-width: 0;
+}
+
+.quill-editor-bootstrap .quill-image-caret {
+  position: absolute;
+  width: 1px;
+  background: currentColor;
+  pointer-events: none;
+  z-index: 10;
+  animation: quill-image-caret-blink 1s steps(1) infinite;
+}
+
+.quill-editor-bootstrap .ql-editor.image-caret-active {
+  caret-color: transparent;
+}
+
+@keyframes quill-image-caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 .quill-editor-bootstrap .ql-toolbar {
